@@ -1,0 +1,41 @@
+{
+  "myProfile": "Mon Profil",
+  "profileDescription": "Afficher et modifier les informations de votre compte",
+  "profileUpdated": "Profil mis à jour",
+  "fullName": "Nom complet",
+  "fullNamePlaceholder": "Entrez votre nom complet",
+  "court": "Tribunal",
+  "noCourt": "Non assigné",
+  "memberSince": "Membre depuis",
+  
+  "security": "Sécurité",
+  "securityDescription": "Gérer votre mot de passe et les paramètres de sécurité",
+  "changePassword": "Changer le mot de passe",
+  "changePasswordDescription": "Mettez à jour votre mot de passe pour sécuriser votre compte",
+  "currentPassword": "Mot de passe actuel",
+  "newPassword": "Nouveau mot de passe",
+  "newPasswordLabel": "Nouveau mot de passe",
+  "confirmPassword": "Confirmer le mot de passe",
+  "updatePassword": "Mettre à jour le mot de passe",
+  "passwordChanged": "Mot de passe modifié avec succès",
+  "currentPasswordIncorrect": "Le mot de passe actuel est incorrect",
+  "passwordMustBeDifferent": "Le nouveau mot de passe doit être différent de l'actuel",
+  "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères",
+  
+  "permissions": "Permissions",
+  "permissionsDescription": "Permissions accordées à votre compte selon votre rôle",
+  "permissionLabels": {
+    "can_upload": "Télécharger des fichiers",
+    "can_validate": "Valider les jugements",
+    "can_manage_users": "Gérer les utilisateurs",
+    "can_manage_courts": "Gérer les tribunaux",
+    "can_view_all_courts": "Voir tous les tribunaux",
+    "can_delete_judgments": "Supprimer les jugements"
+  },
+  
+  "securityTips": "Conseils de sécurité",
+  "tipLength": "Utilisez au moins 8 caractères",
+  "tipMix": "Mélangez majuscules, minuscules, chiffres et symboles",
+  "tipUnique": "Utilisez un mot de passe unique pour ce compte",
+  "tipNoPersonal": "Évitez d'utiliser des informations personnelles"
+}

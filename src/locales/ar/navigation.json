@@ -1,0 +1,20 @@
+{
+  "dashboard": "لوحة التحكم",
+  "batches": "الدفعات",
+  "newBatch": "دفعة جديدة",
+  "dataEntry": "إدخال البيانات",
+  "dataEntryQueue": "قائمة الإدخال",
+  "validation": "التدقيق",
+  "validationQueue": "قائمة التدقيق",
+  "judgments": "الأحكام",
+  "searchJudgments": "بحث الأحكام",
+  "verifiedJudgments": "الأحكام الموثقة",
+  "admin": "الإدارة",
+  "users": "المستخدمون",
+  "courts": "المحاكم",
+  "auditLogs": "سجل التدقيق",
+  "settings": "الإعدادات",
+  "help": "المساعدة",
+  "collapse": "طي القائمة",
+  "expand": "توسيع القائمة"
+}

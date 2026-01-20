@@ -1,0 +1,20 @@
+{
+  "dashboard": "Tableau de bord",
+  "batches": "Lots",
+  "newBatch": "Nouveau lot",
+  "dataEntry": "Saisie de données",
+  "dataEntryQueue": "File de saisie",
+  "validation": "Validation",
+  "validationQueue": "File de validation",
+  "judgments": "Jugements",
+  "searchJudgments": "Rechercher des jugements",
+  "verifiedJudgments": "Jugements vérifiés",
+  "admin": "Administration",
+  "users": "Utilisateurs",
+  "courts": "Tribunaux",
+  "auditLogs": "Journal d'audit",
+  "settings": "Paramètres",
+  "help": "Aide",
+  "collapse": "Réduire le menu",
+  "expand": "Développer le menu"
+}

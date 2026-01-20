@@ -1,0 +1,57 @@
+{
+  "usersManagement": "إدارة المستخدمين",
+  "usersDescription": "إضافة وتعديل وإدارة حسابات المستخدمين",
+  "addUser": "إضافة مستخدم",
+  "editUser": "تعديل مستخدم",
+  "deleteUser": "حذف مستخدم",
+  "userDetails": "تفاصيل المستخدم",
+  
+  "username": "اسم المستخدم",
+  "usernamePlaceholder": "أدخل اسم المستخدم",
+  "password": "كلمة المرور",
+  "passwordPlaceholder": "أدخل كلمة المرور",
+  "fullName": "الاسم الكامل",
+  "fullNamePlaceholder": "أدخل الاسم الكامل",
+  "role": "الدور",
+  "selectRole": "اختر الدور",
+  "court": "المحكمة",
+  "selectCourt": "اختر المحكمة",
+  "status": "الحالة",
+  
+  "roles": {
+    "admin": "مدير",
+    "validator": "مدقق",
+    "data_entry": "إدخال بيانات",
+    "viewer": "عارض"
+  },
+  
+  "active": "نشط",
+  "inactive": "غير نشط",
+  "enableUser": "تفعيل المستخدم",
+  "disableUser": "تعطيل المستخدم",
+  "resetPassword": "إعادة تعيين كلمة المرور",
+  
+  "userCreated": "تم إنشاء المستخدم بنجاح",
+  "userUpdated": "تم تحديث المستخدم بنجاح",
+  "userDeleted": "تم حذف المستخدم",
+  "userEnabled": "تم تفعيل المستخدم",
+  "userDisabled": "تم تعطيل المستخدم",
+  "passwordReset": "تم إعادة تعيين كلمة المرور",
+  
+  "confirmDelete": "تأكيد الحذف",
+  "deleteWarning": "هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.",
+  "confirmDisable": "تأكيد التعطيل",
+  "disableWarning": "سيتم منع هذا المستخدم من الوصول إلى النظام.",
+  
+  "noUsers": "لا يوجد مستخدمون",
+  "noUsersDescription": "لم يتم إنشاء أي مستخدمين بعد",
+  
+  "searchUsers": "البحث عن مستخدم...",
+  "filterByRole": "تصفية حسب الدور",
+  "filterByStatus": "تصفية حسب الحالة",
+  "filterByCourt": "تصفية حسب المحكمة",
+  
+  "lastLogin": "آخر تسجيل دخول",
+  "createdAt": "تاريخ الإنشاء",
+  "noCourt": "بدون محكمة"
+}

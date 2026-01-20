@@ -1,0 +1,77 @@
+{
+  "auditLogs": "Journal d'activité",
+  "auditLogsDescription": "Surveiller toutes les actions et modifications du système",
+  
+  "action": "Action",
+  "user": "Utilisateur",
+  "entityType": "Type d'entité",
+  "entityId": "ID de l'entité",
+  "timestamp": "Horodatage",
+  "details": "Détails",
+  "before": "Avant",
+  "after": "Après",
+  
+  "actions": {
+    "user_login": "Connexion",
+    "user_logout": "Déconnexion",
+    "user_registered": "Inscription",
+    "password_changed": "Changement de mot de passe",
+    "password_reset_by_admin": "Réinitialisation du mot de passe",
+    "profile_updated": "Mise à jour du profil",
+    
+    "batch_created": "Lot créé",
+    "batch_files_uploaded": "Fichiers téléchargés",
+    "batch_processing_queued": "Traitement en file d'attente",
+    "batch_processing_started": "Traitement démarré",
+    "batch_processing_completed": "Traitement terminé",
+    "batch_processing_cancelled": "Traitement annulé",
+    "batch_file_retry": "Réessai de fichier",
+    "batch_retry_all_failed": "Réessai des fichiers échoués",
+    "batch_file_deleted": "Fichier supprimé",
+    "batch_reset": "Lot réinitialisé",
+    "batch_deleted": "Lot supprimé",
+    
+    "judgment_created": "Jugement créé",
+    "judgment_created_manual": "Jugement créé manuellement",
+    "judgment_updated": "Jugement mis à jour",
+    "judgment_deleted": "Jugement supprimé",
+    "judgment_verified": "Jugement vérifié",
+    "judgment_validated": "Jugement validé",
+    "judgment_validation_edited": "Modification lors de la validation",
+    "judgment_reprocess_started": "Retraitement démarré",
+    
+    "data_entry_updated": "Saisie mise à jour",
+    "data_entry_deleted": "Saisie supprimée",
+    "submitted_for_review": "Soumis pour révision",
+    "sent_to_data_entry": "Envoyé à la saisie",
+    
+    "duplicate_confirmed": "Doublon confirmé",
+    "duplicate_dismissed": "Doublon rejeté",
+    
+    "court_created": "Tribunal créé",
+    "court_updated": "Tribunal mis à jour",
+    "court_deleted": "Tribunal supprimé",
+    "court_alias_added": "Alias ajouté",
+    "court_alias_removed": "Alias supprimé"
+  },
+  
+  "entityTypes": {
+    "user": "Utilisateur",
+    "batch": "Lot",
+    "batch_file": "Fichier de lot",
+    "judgment": "Jugement",
+    "court": "Tribunal"
+  },
+  
+  "noLogs": "Aucun journal",
+  "noLogsDescription": "Aucune activité n'a été enregistrée",
+  
+  "filterByAction": "Filtrer par action",
+  "filterByUser": "Filtrer par utilisateur",
+  "filterByEntityType": "Filtrer par type d'entité",
+  "filterByDate": "Filtrer par date",
+  
+  "viewChanges": "Voir les modifications",
+  "noChanges": "Aucune modification enregistrée",
+  "systemAction": "Action système"
+}

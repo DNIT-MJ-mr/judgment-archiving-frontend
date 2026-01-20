@@ -1,0 +1,77 @@
+{
+  "auditLogs": "سجل النشاط",
+  "auditLogsDescription": "مراقبة جميع الإجراءات والتغييرات في النظام",
+  
+  "action": "الإجراء",
+  "user": "المستخدم",
+  "entityType": "نوع الكيان",
+  "entityId": "معرف الكيان",
+  "timestamp": "الوقت",
+  "details": "التفاصيل",
+  "before": "قبل",
+  "after": "بعد",
+  
+  "actions": {
+    "user_login": "تسجيل دخول",
+    "user_logout": "تسجيل خروج",
+    "user_registered": "تسجيل مستخدم",
+    "password_changed": "تغيير كلمة المرور",
+    "password_reset_by_admin": "إعادة تعيين كلمة المرور",
+    "profile_updated": "تحديث الملف الشخصي",
+    
+    "batch_created": "إنشاء دفعة",
+    "batch_files_uploaded": "رفع ملفات",
+    "batch_processing_queued": "بدء المعالجة",
+    "batch_processing_started": "بدأت المعالجة",
+    "batch_processing_completed": "اكتملت المعالجة",
+    "batch_processing_cancelled": "إلغاء المعالجة",
+    "batch_file_retry": "إعادة محاولة ملف",
+    "batch_retry_all_failed": "إعادة محاولة الملفات الفاشلة",
+    "batch_file_deleted": "حذف ملف",
+    "batch_reset": "إعادة تعيين الدفعة",
+    "batch_deleted": "حذف الدفعة",
+    
+    "judgment_created": "إنشاء حكم",
+    "judgment_created_manual": "إنشاء حكم يدوي",
+    "judgment_updated": "تحديث حكم",
+    "judgment_deleted": "حذف حكم",
+    "judgment_verified": "توثيق حكم",
+    "judgment_validated": "التحقق من حكم",
+    "judgment_validation_edited": "تعديل أثناء التحقق",
+    "judgment_reprocess_started": "بدء إعادة المعالجة",
+    
+    "data_entry_updated": "تحديث إدخال البيانات",
+    "data_entry_deleted": "حذف إدخال البيانات",
+    "submitted_for_review": "إرسال للمراجعة",
+    "sent_to_data_entry": "إرسال لإدخال البيانات",
+    
+    "duplicate_confirmed": "تأكيد التكرار",
+    "duplicate_dismissed": "رفض التكرار",
+    
+    "court_created": "إنشاء محكمة",
+    "court_updated": "تحديث محكمة",
+    "court_deleted": "حذف محكمة",
+    "court_alias_added": "إضافة اسم بديل",
+    "court_alias_removed": "إزالة اسم بديل"
+  },
+  
+  "entityTypes": {
+    "user": "مستخدم",
+    "batch": "دفعة",
+    "batch_file": "ملف دفعة",
+    "judgment": "حكم",
+    "court": "محكمة"
+  },
+  
+  "noLogs": "لا توجد سجلات",
+  "noLogsDescription": "لم يتم تسجيل أي نشاط بعد",
+  
+  "filterByAction": "تصفية حسب الإجراء",
+  "filterByUser": "تصفية حسب المستخدم",
+  "filterByEntityType": "تصفية حسب نوع الكيان",
+  "filterByDate": "تصفية حسب التاريخ",
+  
+  "viewChanges": "عرض التغييرات",
+  "noChanges": "لا توجد تغييرات مسجلة",
+  "systemAction": "إجراء النظام"
+}

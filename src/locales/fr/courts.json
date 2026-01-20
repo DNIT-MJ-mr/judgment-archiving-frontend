@@ -1,0 +1,43 @@
+{
+  "courtsManagement": "Gestion des tribunaux",
+  "courtsDescription": "Ajouter, modifier et gérer les tribunaux",
+  "addCourt": "Ajouter un tribunal",
+  "editCourt": "Modifier le tribunal",
+  "deleteCourt": "Supprimer le tribunal",
+  "courtDetails": "Détails du tribunal",
+  
+  "name": "Nom du tribunal",
+  "namePlaceholder": "Entrez le nom du tribunal",
+  "code": "Code du tribunal",
+  "codePlaceholder": "Ex: APP_NKC",
+  "aliases": "Alias",
+  "aliasesPlaceholder": "Entrez un alias",
+  "addAlias": "Ajouter un alias",
+  "removeAlias": "Supprimer",
+  
+  "courtCreated": "Tribunal créé avec succès",
+  "courtUpdated": "Tribunal mis à jour avec succès",
+  "courtDeleted": "Tribunal supprimé",
+  "aliasAdded": "Alias ajouté",
+  "aliasRemoved": "Alias supprimé",
+  
+  "confirmDelete": "Confirmer la suppression",
+  "deleteWarning": "Êtes-vous sûr de vouloir supprimer ce tribunal ?",
+  "hasAssociatedData": "Ce tribunal a des données associées",
+  "forceDelete": "Forcer la suppression",
+  "forceDeleteWarning": "Tous les jugements et utilisateurs associés seront dissociés de ce tribunal.",
+  
+  "noCourts": "Aucun tribunal",
+  "noCourtsDescription": "Aucun tribunal n'a été créé",
+  
+  "searchCourts": "Rechercher un tribunal...",
+  
+  "statistics": "Statistiques",
+  "totalJudgments": "Total des jugements",
+  "verifiedJudgments": "Jugements vérifiés",
+  "pendingJudgments": "Jugements en attente",
+  "totalUsers": "Total des utilisateurs",
+  
+  "aliasesHelp": "Les alias aident à faire correspondre les noms de tribunaux extraits automatiquement",
+  "codeHelp": "Code unique utilisé pour l'identification interne"
+}

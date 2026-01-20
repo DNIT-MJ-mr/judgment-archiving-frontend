@@ -1,0 +1,41 @@
+{
+  "myProfile": "ملفي الشخصي",
+  "profileDescription": "عرض وتعديل معلومات حسابك",
+  "profileUpdated": "تم تحديث الملف الشخصي",
+  "fullName": "الاسم الكامل",
+  "fullNamePlaceholder": "أدخل اسمك الكامل",
+  "court": "المحكمة",
+  "noCourt": "غير محدد",
+  "memberSince": "عضو منذ",
+  
+  "security": "الأمان",
+  "securityDescription": "إدارة كلمة المرور وإعدادات الأمان",
+  "changePassword": "تغيير كلمة المرور",
+  "changePasswordDescription": "قم بتحديث كلمة المرور للحفاظ على أمان حسابك",
+  "currentPassword": "كلمة المرور الحالية",
+  "newPassword": "كلمة المرور الجديدة",
+  "newPasswordLabel": "كلمة المرور الجديدة",
+  "confirmPassword": "تأكيد كلمة المرور",
+  "updatePassword": "تحديث كلمة المرور",
+  "passwordChanged": "تم تغيير كلمة المرور بنجاح",
+  "currentPasswordIncorrect": "كلمة المرور الحالية غير صحيحة",
+  "passwordMustBeDifferent": "يجب أن تكون كلمة المرور الجديدة مختلفة عن الحالية",
+  "passwordRequirements": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
+  
+  "permissions": "الصلاحيات",
+  "permissionsDescription": "الصلاحيات الممنوحة لحسابك بناءً على دورك",
+  "permissionLabels": {
+    "can_upload": "رفع الملفات",
+    "can_validate": "التحقق من الأحكام",
+    "can_manage_users": "إدارة المستخدمين",
+    "can_manage_courts": "إدارة المحاكم",
+    "can_view_all_courts": "عرض جميع المحاكم",
+    "can_delete_judgments": "حذف الأحكام"
+  },
+  
+  "securityTips": "نصائح أمنية",
+  "tipLength": "استخدم 8 أحرف على الأقل",
+  "tipMix": "امزج بين الحروف الكبيرة والصغيرة والأرقام والرموز",
+  "tipUnique": "استخدم كلمة مرور فريدة لهذا الحساب",
+  "tipNoPersonal": "تجنب استخدام المعلومات الشخصية"
+}

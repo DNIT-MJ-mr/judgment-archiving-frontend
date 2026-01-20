@@ -1,0 +1,172 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 142 76% 36%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 142 76% 36%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* RTL Support */
+  [dir="rtl"] {
+    font-family: 'Noto Sans Arabic', 'Tahoma', sans-serif;
+  }
+
+  [dir="ltr"] {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  /* Status badges */
+  .status-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .status-verified {
+    @apply bg-status-verified/10 text-status-verified;
+  }
+
+  .status-review {
+    @apply bg-status-review/20 text-amber-700;
+  }
+
+  .status-failed {
+    @apply bg-status-failed/10 text-status-failed;
+  }
+
+  .status-auto {
+    @apply bg-status-auto/10 text-status-auto;
+  }
+
+  .status-pending {
+    @apply bg-status-pending/10 text-status-pending;
+  }
+
+  /* Confidence indicators */
+  .confidence-high {
+    @apply text-mr-green;
+  }
+
+  .confidence-medium {
+    @apply text-mr-gold;
+  }
+
+  .confidence-low {
+    @apply text-mr-red;
+  }
+
+  /* Header styling */
+  .app-header {
+    @apply bg-mr-red text-white;
+  }
+
+  /* Sidebar styling */
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors;
+  }
+
+  .sidebar-item-active {
+    @apply bg-mr-green text-white;
+  }
+
+  .sidebar-item-inactive {
+    @apply text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+  }
+
+  [dir="rtl"] .sidebar-item-inactive {
+    @apply text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+  }
+}
+
+@layer utilities {
+  /* RTL-aware spacing utilities */
+  .ps-0 { padding-inline-start: 0; }
+  .ps-1 { padding-inline-start: 0.25rem; }
+  .ps-2 { padding-inline-start: 0.5rem; }
+  .ps-3 { padding-inline-start: 0.75rem; }
+  .ps-4 { padding-inline-start: 1rem; }
+  .ps-6 { padding-inline-start: 1.5rem; }
+  .ps-8 { padding-inline-start: 2rem; }
+
+  .pe-0 { padding-inline-end: 0; }
+  .pe-1 { padding-inline-end: 0.25rem; }
+  .pe-2 { padding-inline-end: 0.5rem; }
+  .pe-3 { padding-inline-end: 0.75rem; }
+  .pe-4 { padding-inline-end: 1rem; }
+  .pe-6 { padding-inline-end: 1.5rem; }
+  .pe-8 { padding-inline-end: 2rem; }
+
+  .ms-0 { margin-inline-start: 0; }
+  .ms-1 { margin-inline-start: 0.25rem; }
+  .ms-2 { margin-inline-start: 0.5rem; }
+  .ms-3 { margin-inline-start: 0.75rem; }
+  .ms-4 { margin-inline-start: 1rem; }
+  .ms-auto { margin-inline-start: auto; }
+
+  .me-0 { margin-inline-end: 0; }
+  .me-1 { margin-inline-end: 0.25rem; }
+  .me-2 { margin-inline-end: 0.5rem; }
+  .me-3 { margin-inline-end: 0.75rem; }
+  .me-4 { margin-inline-end: 1rem; }
+  .me-auto { margin-inline-end: auto; }
+
+  .start-0 { inset-inline-start: 0; }
+  .end-0 { inset-inline-end: 0; }
+
+  /* Hide scrollbar but allow scrolling */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

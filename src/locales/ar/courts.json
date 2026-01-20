@@ -1,0 +1,43 @@
+{
+  "courtsManagement": "إدارة المحاكم",
+  "courtsDescription": "إضافة وتعديل وإدارة المحاكم",
+  "addCourt": "إضافة محكمة",
+  "editCourt": "تعديل المحكمة",
+  "deleteCourt": "حذف المحكمة",
+  "courtDetails": "تفاصيل المحكمة",
+  
+  "name": "اسم المحكمة",
+  "namePlaceholder": "أدخل اسم المحكمة",
+  "code": "رمز المحكمة",
+  "codePlaceholder": "مثال: APP_NKC",
+  "aliases": "الأسماء البديلة",
+  "aliasesPlaceholder": "أدخل اسماً بديلاً",
+  "addAlias": "إضافة اسم بديل",
+  "removeAlias": "إزالة",
+  
+  "courtCreated": "تم إنشاء المحكمة بنجاح",
+  "courtUpdated": "تم تحديث المحكمة بنجاح",
+  "courtDeleted": "تم حذف المحكمة",
+  "aliasAdded": "تم إضافة الاسم البديل",
+  "aliasRemoved": "تم إزالة الاسم البديل",
+  
+  "confirmDelete": "تأكيد الحذف",
+  "deleteWarning": "هل أنت متأكد من حذف هذه المحكمة؟",
+  "hasAssociatedData": "هذه المحكمة مرتبطة ببيانات",
+  "forceDelete": "حذف بالقوة",
+  "forceDeleteWarning": "سيتم فصل جميع الأحكام والمستخدمين المرتبطين عن هذه المحكمة.",
+  
+  "noCourts": "لا توجد محاكم",
+  "noCourtsDescription": "لم يتم إنشاء أي محاكم بعد",
+  
+  "searchCourts": "البحث عن محكمة...",
+  
+  "statistics": "الإحصائيات",
+  "totalJudgments": "إجمالي الأحكام",
+  "verifiedJudgments": "الأحكام الموثقة",
+  "pendingJudgments": "الأحكام المعلقة",
+  "totalUsers": "إجمالي المستخدمين",
+  
+  "aliasesHelp": "الأسماء البديلة تساعد في مطابقة أسماء المحاكم المستخرجة تلقائياً",
+  "codeHelp": "رمز فريد يستخدم للتعريف الداخلي"
+}

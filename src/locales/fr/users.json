@@ -1,0 +1,57 @@
+{
+  "usersManagement": "Gestion des utilisateurs",
+  "usersDescription": "Ajouter, modifier et gérer les comptes utilisateurs",
+  "addUser": "Ajouter un utilisateur",
+  "editUser": "Modifier l'utilisateur",
+  "deleteUser": "Supprimer l'utilisateur",
+  "userDetails": "Détails de l'utilisateur",
+  
+  "username": "Nom d'utilisateur",
+  "usernamePlaceholder": "Entrez le nom d'utilisateur",
+  "password": "Mot de passe",
+  "passwordPlaceholder": "Entrez le mot de passe",
+  "fullName": "Nom complet",
+  "fullNamePlaceholder": "Entrez le nom complet",
+  "role": "Rôle",
+  "selectRole": "Sélectionner un rôle",
+  "court": "Tribunal",
+  "selectCourt": "Sélectionner un tribunal",
+  "status": "Statut",
+  
+  "roles": {
+    "admin": "Administrateur",
+    "validator": "Validateur",
+    "data_entry": "Saisie de données",
+    "viewer": "Lecteur"
+  },
+  
+  "active": "Actif",
+  "inactive": "Inactif",
+  "enableUser": "Activer l'utilisateur",
+  "disableUser": "Désactiver l'utilisateur",
+  "resetPassword": "Réinitialiser le mot de passe",
+  
+  "userCreated": "Utilisateur créé avec succès",
+  "userUpdated": "Utilisateur mis à jour avec succès",
+  "userDeleted": "Utilisateur supprimé",
+  "userEnabled": "Utilisateur activé",
+  "userDisabled": "Utilisateur désactivé",
+  "passwordReset": "Mot de passe réinitialisé",
+  
+  "confirmDelete": "Confirmer la suppression",
+  "deleteWarning": "Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.",
+  "confirmDisable": "Confirmer la désactivation",
+  "disableWarning": "Cet utilisateur ne pourra plus accéder au système.",
+  
+  "noUsers": "Aucun utilisateur",
+  "noUsersDescription": "Aucun utilisateur n'a été créé",
+  
+  "searchUsers": "Rechercher un utilisateur...",
+  "filterByRole": "Filtrer par rôle",
+  "filterByStatus": "Filtrer par statut",
+  "filterByCourt": "Filtrer par tribunal",
+  
+  "lastLogin": "Dernière connexion",
+  "createdAt": "Date de création",
+  "noCourt": "Sans tribunal"
+}

@@ -1,6 +1,6 @@
 {
   "appName": "نظام إدارة الأحكام القضائية",
-  "appNameShort": "الأحكام",
+  "appNameShort": "أرشيف الأحكام",
   "loading": "جاري التحميل...",
   "save": "حفظ",
   "cancel": "إلغاء",
@@ -41,8 +41,9 @@
   "error": "خطأ",
   "warning": "تحذير",
   "info": "معلومة",
-  "copyright": "© الجمهورية الإسلامية الموريتانية",
+  "copyright": "© مديرية الرقمنة والابتكار التكنولوجي",
   "language": "اللغة",
   "arabic": "العربية",
-  "french": "Français"
+  "french": "Français",
+  "ministryLogo": "شعار وزارة العدل"
 }

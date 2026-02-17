@@ -83,6 +83,7 @@ export function BatchDetailPage() {
     queryFn: () => batchesApi.getDetails(id),
     enabled: !!id,
     refetchInterval: (data: any) => (data?.is_processing ? 3000 : false),
+    refetchOnMount: 'stale',
   })
 
   // Mutations

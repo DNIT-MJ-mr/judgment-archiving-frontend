@@ -183,6 +183,7 @@ export function AuditLogsPage() {
         page_size: pageSize,
         entity_type: entityType || undefined,
       }),
+    refetchOnMount: 'stale',
   })
 
   const logs = logsData?.items || []

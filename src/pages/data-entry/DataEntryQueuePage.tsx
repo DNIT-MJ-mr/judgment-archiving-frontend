@@ -49,12 +49,14 @@ export function DataEntryQueuePage() {
         page,
         page_size: pageSize,
       }),
+    refetchOnMount: 'stale',
   })
 
   // Fetch stats
   const { data: stats } = useQuery({
     queryKey: ['data-entry-stats'],
     queryFn: () => dataEntryApi.getStats(),
+    refetchOnMount: 'stale',
   })
 
   // Get next item

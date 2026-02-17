@@ -19,9 +19,16 @@ export const filesApi = {
 
   // Get file as blob for preview
   downloadJudgmentFile: async (judgmentId: number): Promise<Blob> => {
+    const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+    console.log('downloadJudgmentFile - token exists:', !!token)
+
     const response = await apiClient.get(`/files/judgment/${judgmentId}`, {
       responseType: 'blob',
+      headers: {
+        Authorization: token ? `Bearer ${token}` : undefined,
+      },
     })
+    console.log('downloadJudgmentFile - response status:', response.status, 'size:', response.data.size)
     return response.data
   },
 

@@ -69,19 +69,23 @@ export function LoginPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
       {/* Language Toggle */}
       <div className="absolute top-4 end-4">
-        <Button
+        {/* <Button
           variant="outline"
           size="sm"
           onClick={toggleLanguage}
         >
           {language === 'ar' ? 'Français' : 'العربية'}
-        </Button>
+        </Button> */}
       </div>
 
       {/* Logo and Header */}
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-mr-red">
-          <span className="text-3xl font-bold text-white">م</span>
+          <img
+            src="/images/National_Seal_of_Mauritania.png"
+            alt={t('ministryLogo', 'Ministry of Justice Logo')}
+            className="object-contain"
+          />
         </div>
         <h1 className="text-2xl font-bold text-gray-900">
           {t('common:appName')}
@@ -90,6 +94,12 @@ export function LoginPage() {
           {language === 'ar' 
             ? 'الجمهورية الإسلامية الموريتانية' 
             : 'République Islamique de Mauritanie'}
+        </p>
+        <p className="mt-1 text-sm text-gray-500">
+          {language === 'ar' 
+            ? 'وزارة العدل' 
+            : 'Ministère de la Justice'
+          }
         </p>
       </div>
 

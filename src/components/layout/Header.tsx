@@ -50,17 +50,32 @@ export function Header() {
           </Button>
           
           <Link to="/" className="flex items-center gap-3">
-            {/* Logo placeholder - you can replace with actual logo */}
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white">
-              <span className="text-lg font-bold text-mr-green">م</span>
+            <div className="flex h-15 w-15 object-contain items-center justify-center rounded-full bg-mr-green flex-shrink-0">
+              <img
+                src="/images/National_Seal_of_Mauritania.png"
+                alt={t('ministryLogo', 'Ministry of Justice Logo')}
+                className="h-12 w-12 object-contain"
+              />
             </div>
             <div className="hidden md:block">
-              <h1 className="text-lg font-semibold leading-tight">
+              {/* <h1 className="text-lg font-semibold leading-tight">
                 {t('common:appNameShort')}
-              </h1>
-              <p className="text-xs text-white/80">
-                {language === 'ar' ? 'الجمهورية الإسلامية الموريتانية' : 'République Islamique de Mauritanie'}
+              </h1> */}
+              <p className="text-md leading-tight">
+                {language === 'ar' 
+                        ? 'الجمهورية الإسلامية الموريتانية' 
+                        : 'République Islamique de Mauritanie'
+                }
               </p>
+              <div className="h-0.5 bg-mr-green w-32 my-1"></div>
+              <p className="text-md leading-tight">
+                {language === 'ar' ? 'وزارة العدل' : 'Ministère de la Justice'}
+              </p>
+              {/* Separator line */}
+              {/* <div className="h-0.5 bg-mr-green w-32 my-1"></div>
+              <p className="text-md leading-tight">
+                {language === 'ar' ? 'مديرية الرقمنة والابتكار التكنولوجي' : 'Direction de la Numérisation et de l\'Innovation Technologique'}
+              </p> */}
             </div>
           </Link>
         </div>
@@ -68,14 +83,14 @@ export function Header() {
         {/* Right side: Language toggle + User menu */}
         <div className="flex items-center gap-2">
           {/* Language Toggle */}
-          <Button
+          {/* <Button
             variant="ghost"
             size="sm"
             onClick={toggleLanguage}
             className="text-white hover:bg-mr-red-dark"
           >
             {language === 'ar' ? 'FR' : 'ع'}
-          </Button>
+          </Button> */}
 
           {/* User Menu */}
           {user && (
@@ -87,7 +102,7 @@ export function Header() {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-mr-green text-white text-sm">
-                      {getInitials(user.full_name || user.username)}
+                      <User />
                     </AvatarFallback>
                   </Avatar>
                   <span className="hidden md:inline-block max-w-[150px] truncate">

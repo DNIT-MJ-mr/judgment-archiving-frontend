@@ -78,6 +78,7 @@ export function UsersPage() {
   } = useQuery({
     queryKey: ['users'],
     queryFn: () => usersApi.list(),
+    refetchOnMount: 'stale',
   })
 
   // Fetch courts for dropdown

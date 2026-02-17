@@ -65,7 +65,13 @@ export function BatchesPage() {
     queryKey: ['batches', statusFilter],
     queryFn: () =>
       batchesApi.list(statusFilter !== 'all' ? { status: statusFilter } : undefined),
-    refetchInterval: 10000,
+    refetchInterval: (data: any) => {
+      // Check if data is an array and if any batch is processing
+      const hasProcessing = Array.isArray(data) && data.some((batch: any) => batch.is_processing)
+      // Refetch every 5 seconds if processing, otherwise stop
+      return hasProcessing ? 5000 : false
+    },
+    refetchOnMount: 'stale',
   })
 
   const deleteMutation = useMutation({

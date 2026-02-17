@@ -185,6 +185,10 @@ export function Sidebar() {
             </>
           )}
         </nav>
+        
+        <p className="mt-8 text-center text-xs text-gray-500">
+        {t('common:copyright')}
+        </p>
 
         {/* Collapse toggle */}
         <div className="border-t p-2">

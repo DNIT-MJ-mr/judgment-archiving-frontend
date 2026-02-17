@@ -39,6 +39,7 @@ export function ValidationQueuePage() {
         page,
         page_size: pageSize,
       }),
+    refetchOnMount: 'stale',
   })
 
   // Get next item handler

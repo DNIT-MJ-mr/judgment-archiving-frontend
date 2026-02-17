@@ -87,6 +87,7 @@ export function JudgmentsPage() {
   } = useQuery({
     queryKey: ['judgments', queryParams],
     queryFn: () => judgmentsApi.search(queryParams),
+    refetchOnMount: 'stale',
   })
 
   const handleFilterChange = (key: keyof SearchFilters, value: string) => {

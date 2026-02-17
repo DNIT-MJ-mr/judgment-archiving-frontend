@@ -1,6 +1,6 @@
 {
   "appName": "Système de Gestion des Jugements",
-  "appNameShort": "Jugements",
+  "appNameShort": "Archives des jugements",
   "loading": "Chargement...",
   "save": "Enregistrer",
   "cancel": "Annuler",
@@ -41,8 +41,9 @@
   "error": "Erreur",
   "warning": "Attention",
   "info": "Information",
-  "copyright": "© République Islamique de Mauritanie",
+  "copyright": "© Direction de la Numérisation et de l'Innovation Technologique",
   "language": "Langue",
   "arabic": "العربية",
-  "french": "Français"
+  "french": "Français",
+  "ministryLogo": "Logo du Ministère de la Justice"
 }

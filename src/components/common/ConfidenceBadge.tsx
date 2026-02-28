@@ -74,7 +74,7 @@ interface FieldConfidenceProps {
   pattern?: string | null
 }
 
-export function FieldConfidence({ fieldName, score, pattern }: FieldConfidenceProps) {
+export function FieldConfidence({ score, pattern }: FieldConfidenceProps) {
   const { t } = useTranslation('dataEntry')
   const level = getConfidenceLevel(score)
 

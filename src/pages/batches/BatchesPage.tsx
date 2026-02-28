@@ -71,7 +71,7 @@ export function BatchesPage() {
       // Refetch every 5 seconds if processing, otherwise stop
       return hasProcessing ? 5000 : false
     },
-    refetchOnMount: 'stale',
+    refetchOnMount: false,
   })
 
   const deleteMutation = useMutation({

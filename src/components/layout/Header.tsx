@@ -18,18 +18,8 @@ import { Link } from 'react-router-dom'
 export function Header() {
   const { t } = useTranslation(['common', 'auth', 'navigation'])
   const { user, logout } = useAuth()
-  const { language, toggleLanguage } = useLanguage()
+  const { language } = useLanguage()
   const { toggle: toggleSidebar } = useSidebar()
-
-  const getInitials = (name: string | null | undefined) => {
-    if (!name) return 'U'
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-  }
 
   const handleLogout = async () => {
     await logout()

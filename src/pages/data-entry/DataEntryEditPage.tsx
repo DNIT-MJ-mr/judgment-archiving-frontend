@@ -59,7 +59,7 @@ export function DataEntryEditPage() {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: (data: JudgmentFormValues) => dataEntryApi.updateItem(id, data),
+    mutationFn: (data: JudgmentFormValues) => dataEntryApi.updateItem(id, data as any),
     onSuccess: () => {
       toast.success(t('savedSuccessfully'))
       queryClient.invalidateQueries({ queryKey: ['data-entry-item', id] })
@@ -73,7 +73,7 @@ export function DataEntryEditPage() {
   const submitMutation = useMutation({
     mutationFn: async (data: JudgmentFormValues) => {
       // First save, then submit
-      await dataEntryApi.updateItem(id, data)
+      await dataEntryApi.updateItem(id, data as any)
       return dataEntryApi.submitForReview(id)
     },
     onSuccess: (response) => {
@@ -128,11 +128,11 @@ export function DataEntryEditPage() {
   })
 
   const handleSave = (data: JudgmentFormValues) => {
-    updateMutation.mutate(data)
+    updateMutation.mutate(data as any)
   }
 
   const handleSubmit = (data: JudgmentFormValues) => {
-    submitMutation.mutate(data)
+    submitMutation.mutate(data as any)
   }
 
   const handleDelete = () => {
@@ -167,7 +167,20 @@ export function DataEntryEditPage() {
     )
   }
 
-  const fields = judgment.fields || {}
+  const normalizeFields = (rawFields: any) => {
+    if (!rawFields) return {}
+    return {
+      case_number: rawFields.case_number || undefined,
+      judgment_number: rawFields.judgment_number || undefined,
+      judgment_date: rawFields.judgment_date || undefined,
+      extracted_court_text: rawFields.extracted_court_text || undefined,
+      court_id: rawFields.court_id || undefined,
+      judgment_type: rawFields.judgment_type || undefined,
+      degree: rawFields.degree || undefined,
+      sentence_summary: rawFields.sentence_summary || undefined,
+    }
+  }
+  const fields = normalizeFields(judgment.fields)
   const confidence = judgment.confidence || {}
   const source = judgment.source || {}
   const metadata = judgment.metadata || {}

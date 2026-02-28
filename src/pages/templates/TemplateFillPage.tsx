@@ -57,7 +57,7 @@ export function TemplateFillPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
 
-  const pageRefsMap = useRef<Map<number, React.RefObject<HTMLCanvasElement>>>(new Map())
+  const pageRefsMap = useRef<Map<number, { current: HTMLCanvasElement | null }>>(new Map())
   const draggedBoxRef = useRef<string | null>(null)
 
   // Fetch template

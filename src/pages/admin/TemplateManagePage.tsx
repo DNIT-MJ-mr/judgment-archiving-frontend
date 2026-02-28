@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
-import { Template, TemplateCategory } from '@/lib/types'
+import { Template } from '@/lib/types'
 import { toast } from 'sonner'
 import { useNavigate } from 'react-router-dom'
 
@@ -146,7 +146,7 @@ export function TemplateManagePage() {
     setEditingTemplate(template)
     setFormData({
       title: template.title,
-      category_id: template.category_id,
+      category_id: template.category_id || undefined,
     })
   }
 

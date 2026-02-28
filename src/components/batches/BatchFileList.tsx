@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { batchesApi } from '@/api'
+import { BatchFile } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -86,21 +87,6 @@ export function BatchFileList({ batchId, isProcessing }: BatchFileListProps) {
     return <File className="h-5 w-5 text-blue-500" />
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'done':
-        return 'text-mr-green'
-      case 'failed':
-        return 'text-mr-red'
-      case 'processing':
-        return 'text-blue-500'
-      case 'skipped':
-        return 'text-mr-gold'
-      default:
-        return 'text-gray-500'
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="flex h-32 items-center justify-center">
@@ -121,7 +107,7 @@ export function BatchFileList({ batchId, isProcessing }: BatchFileListProps) {
     )
   }
 
-  const files = data?.files || []
+  const files = data?.items || []
   const total = data?.total || 0
   const totalPages = data?.total_pages || 1
 
@@ -157,7 +143,7 @@ export function BatchFileList({ batchId, isProcessing }: BatchFileListProps) {
         {/* File List */}
         {files.length > 0 ? (
           <div className="divide-y rounded-lg border">
-            {files.map((file) => (
+            {files.map((file: BatchFile) => (
               <div
                 key={file.id}
                 className="flex items-center justify-between p-3 hover:bg-gray-50"

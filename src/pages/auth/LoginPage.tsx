@@ -28,7 +28,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 export function LoginPage() {
   const { t } = useTranslation(['auth', 'common', 'errors'])
   const { login } = useAuth()
-  const { language, toggleLanguage } = useLanguage()
+  const { language } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
   

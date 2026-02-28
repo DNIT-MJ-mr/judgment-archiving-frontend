@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { Sparkles, Info, Check, X } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import { courtsApi } from '@/api'
 import { cn, formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'

@@ -78,7 +78,7 @@ export function CourtsPage() {
   } = useQuery({
     queryKey: ['courts-with-stats'],
     queryFn: () => courtsApi.listWithStats(),
-    refetchOnMount: 'stale',
+    refetchOnMount: false,
   })
 
   // Create court mutation

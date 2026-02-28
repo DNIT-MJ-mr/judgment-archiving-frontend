@@ -15,7 +15,7 @@ import {
 import { dataEntryApi } from '@/api'
 import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -30,7 +30,7 @@ import { ConfidenceBadge } from '@/components/common/ConfidenceBadge'
 export function DataEntryQueuePage() {
   const { t } = useTranslation(['dataEntry', 'common', 'judgments'])
   const navigate = useNavigate()
-  const [statusFilter, setStatusFilter] = useState<string>('failed')
+  const [statusFilter, setStatusFilter] = useState<'failed' | 'needs_review' | 'all'>('failed')
   const [page, setPage] = useState(1)
   const pageSize = 20
 
@@ -45,18 +45,18 @@ export function DataEntryQueuePage() {
     queryKey: ['data-entry-queue', statusFilter, page],
     queryFn: () =>
       dataEntryApi.getQueue({
-        status: statusFilter === 'all' ? 'all' : statusFilter,
+        status: statusFilter,
         page,
         page_size: pageSize,
       }),
-    refetchOnMount: 'stale',
+    refetchOnMount: false,
   })
 
   // Fetch stats
   const { data: stats } = useQuery({
     queryKey: ['data-entry-stats'],
     queryFn: () => dataEntryApi.getStats(),
-    refetchOnMount: 'stale',
+    refetchOnMount: false,
   })
 
   // Get next item
@@ -179,7 +179,7 @@ export function DataEntryQueuePage() {
               <Filter className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">{t('common:filter')}:</span>
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as 'failed' | 'needs_review' | 'all')}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>

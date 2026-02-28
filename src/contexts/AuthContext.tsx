@@ -7,7 +7,7 @@ import {
   ReactNode,
 } from 'react'
 import { authApi } from '@/api'
-import { User, UserExtended, AuthToken } from '@/lib/types'
+import { UserExtended } from '@/lib/types'
 import { STORAGE_KEYS } from '@/lib/constants'
 
 interface AuthContextType {

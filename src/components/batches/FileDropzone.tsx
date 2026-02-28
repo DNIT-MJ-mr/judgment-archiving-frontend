@@ -7,9 +7,8 @@ import {
   FileText,
   X,
   AlertCircle,
-  CheckCircle,
 } from 'lucide-react'
-import { cn, formatConfidence } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import { ACCEPTED_FILE_TYPES, MAX_FILE_SIZE } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 

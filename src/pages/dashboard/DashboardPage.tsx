@@ -69,7 +69,7 @@ export function DashboardPage() {
     queryKey: ['dashboard-stats'],
     queryFn: dashboardApi.getStats,
     refetchInterval: 30000, // Refresh every 30 seconds
-    refetchOnMount: 'stale',
+    refetchOnMount: false,
   })
 
   if (isLoading) {

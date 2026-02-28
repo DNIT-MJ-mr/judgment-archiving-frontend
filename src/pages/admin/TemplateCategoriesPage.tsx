@@ -67,7 +67,7 @@ export function TemplateCategoriesPage() {
   } = useQuery({
     queryKey: ['templateCategories'],
     queryFn: () => templatesApi.listCategories(),
-    refetchOnMount: 'stale',
+    refetchOnMount: false,
   })
 
   // Create category mutation

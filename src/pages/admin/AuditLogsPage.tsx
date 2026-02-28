@@ -13,7 +13,6 @@ import {
   Building2,
   Upload,
   Shield,
-  Eye,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
@@ -46,6 +45,11 @@ interface AuditLog {
   before: Record<string, any> | null
   after: Record<string, any> | null
   created_at: string
+}
+
+interface AuditLogsResponse {
+  items: AuditLog[]
+  total: number
 }
 
 const ENTITY_TYPES = ['user', 'judgment', 'batch', 'batch_file', 'court']
@@ -175,7 +179,7 @@ export function AuditLogsPage() {
     error,
     refetch,
     isFetching,
-  } = useQuery({
+  } = useQuery<AuditLogsResponse>({
     queryKey: ['audit-logs', page, entityType],
     queryFn: () =>
       auditLogsApi.list({
@@ -183,7 +187,7 @@ export function AuditLogsPage() {
         page_size: pageSize,
         entity_type: entityType || undefined,
       }),
-    refetchOnMount: 'stale',
+    refetchOnMount: false,
   })
 
   const logs = logsData?.items || []
@@ -193,7 +197,7 @@ export function AuditLogsPage() {
   // Filter logs by search (client-side)
   const filteredLogs = search
     ? logs.filter(
-      (log) =>
+      (log: AuditLog) =>
         log.action.toLowerCase().includes(search.toLowerCase()) ||
         log.username?.toLowerCase().includes(search.toLowerCase()) ||
         log.entity_type.toLowerCase().includes(search.toLowerCase())

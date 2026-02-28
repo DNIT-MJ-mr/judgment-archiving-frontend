@@ -267,7 +267,6 @@ export function ValidationDetailPage() {
               </CardHeader>
               <CardContent>
                 <DuplicateResolution
-                  currentJudgmentId={id}
                   duplicateOfId={judgment.duplicate_of_id!}
                   onConfirm={(primaryId) => confirmDuplicateMutation.mutate(primaryId)}
                   onDismiss={() => dismissDuplicateMutation.mutate()}

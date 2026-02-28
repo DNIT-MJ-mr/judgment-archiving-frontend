@@ -116,7 +116,7 @@ export function JudgmentForm({
       judgment_number: initialData.judgment_number || '',
       judgment_date: initialData.judgment_date || '',
       extracted_court_text: initialData.extracted_court_text || '',
-      court_id: initialData.court_id || null,
+      court_id: initialData.court_id || undefined,
       judgment_type: initialData.judgment_type || '',
       degree: initialData.degree || '',
       sentence_summary: initialData.sentence_summary || '',
@@ -130,14 +130,14 @@ export function JudgmentForm({
       judgment_number: initialData.judgment_number || '',
       judgment_date: initialData.judgment_date || '',
       extracted_court_text: initialData.extracted_court_text || '',
-      court_id: initialData.court_id || null,
+      court_id: initialData.court_id || undefined,
       judgment_type: initialData.judgment_type || '',
       degree: initialData.degree || '',
       sentence_summary: initialData.sentence_summary || '',
     })
   }, [initialData, reset])
 
-  const isRequired = (fieldName: string) => REQUIRED_FIELDS.includes(fieldName)
+  const isRequired = (fieldName: any) => REQUIRED_FIELDS.includes(fieldName)
 
   const renderFieldLabel = (fieldName: string, label: string) => (
     <div className="flex items-center justify-between">

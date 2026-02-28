@@ -8,7 +8,6 @@ import {
   FileText,
   Calendar,
   Loader2,
-  ArrowRight,
 } from 'lucide-react'
 import { judgmentsApi } from '@/api'
 import { formatDate } from '@/lib/utils'
@@ -16,7 +15,6 @@ import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 
 interface DuplicateResolutionProps {
-  currentJudgmentId: number
   duplicateOfId: number
   onConfirm: (primaryId: number) => void
   onDismiss: () => void
@@ -25,7 +23,6 @@ interface DuplicateResolutionProps {
 }
 
 export function DuplicateResolution({
-  currentJudgmentId,
   duplicateOfId,
   onConfirm,
   onDismiss,
@@ -37,7 +34,7 @@ export function DuplicateResolution({
   // Fetch the potential duplicate judgment
   const { data: duplicateJudgment, isLoading } = useQuery({
     queryKey: ['judgment', duplicateOfId],
-    queryFn: () => judgmentsApi.getOne(duplicateOfId),
+    queryFn: () => judgmentsApi.get(duplicateOfId),
     enabled: !!duplicateOfId,
   })
 

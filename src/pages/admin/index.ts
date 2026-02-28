@@ -1,3 +1,5 @@
 export { UsersPage } from './UsersPage'
 export { CourtsPage } from './CourtsPage'
 export { AuditLogsPage } from './AuditLogsPage'
+export { TemplateManagePage } from './TemplateManagePage'
+export { TemplateCategoriesPage } from './TemplateCategoriesPage'

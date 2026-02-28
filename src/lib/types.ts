@@ -100,6 +100,22 @@ export interface JudgmentUpdate extends Partial<JudgmentCreate> {
   extraction_status?: ExtractionStatus
 }
 
+// Template types
+export interface TemplateCategory {
+  id: number
+  name: string
+  description: string | null
+}
+
+export interface Template {
+  id: number
+  title: string
+  page_count: number
+  category_id: number | null
+  created_at: string
+  created_by: number | null
+}
+
 // Batch types
 export interface BatchFile {
   id: number

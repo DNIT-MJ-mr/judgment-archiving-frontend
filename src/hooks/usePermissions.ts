@@ -9,6 +9,7 @@ interface Permissions {
   canManageCourts: boolean
   canViewAllCourts: boolean
   canDeleteJudgments: boolean
+  canManageTemplates: boolean
   canAccessDataEntry: boolean
   canAccessValidation: boolean
   canAccessAdmin: boolean
@@ -30,6 +31,7 @@ export function usePermissions(): Permissions {
         canManageCourts: false,
         canViewAllCourts: false,
         canDeleteJudgments: false,
+        canManageTemplates: false,
         canAccessDataEntry: false,
         canAccessValidation: false,
         canAccessAdmin: false,
@@ -59,6 +61,7 @@ export function usePermissions(): Permissions {
       canManageCourts: permissions.can_manage_courts,
       canViewAllCourts: permissions.can_view_all_courts,
       canDeleteJudgments: permissions.can_delete_judgments,
+      canManageTemplates: role === USER_ROLES.ADMIN,
       canAccessDataEntry: role === USER_ROLES.ADMIN || role === USER_ROLES.DATA_ENTRY || role === USER_ROLES.VALIDATOR,
       canAccessValidation: role === USER_ROLES.ADMIN || role === USER_ROLES.VALIDATOR,
       canAccessAdmin: role === USER_ROLES.ADMIN,

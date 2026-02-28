@@ -11,8 +11,11 @@ import { BatchesPage, NewBatchPage, BatchDetailPage } from '@/pages/batches'
 import { DataEntryQueuePage, DataEntryEditPage } from '@/pages/data-entry'
 import { ValidationQueuePage, ValidationDetailPage } from '@/pages/validation'
 import { JudgmentsPage, JudgmentDetailPage } from '@/pages/judgments'
-import { UsersPage, CourtsPage, AuditLogsPage } from '@/pages/admin'
+import { UsersPage, CourtsPage, AuditLogsPage, TemplateManagePage, TemplateCategoriesPage } from '@/pages/admin'
 import { ProfilePage, ChangePasswordPage } from '@/pages/profile'
+import { TemplatesPage } from '@/pages/templates/TemplatesPage'
+import { TemplateDetailPage } from '@/pages/templates/TemplateDetailPage'
+import { TemplateFillPage } from '@/pages/templates/TemplateFillPage'
 
 // Placeholder for 404
 const NotFoundPage = () => <div className="p-4">404 - Page Not Found</div>
@@ -119,6 +122,12 @@ function AppRoutes() {
           <Route path=":judgmentId" element={<JudgmentDetailPage />} />
         </Route>
 
+        {/* Templates - available to all authenticated users */}
+        <Route path="/templates">
+          <Route index element={<TemplatesPage />} />
+          <Route path=":templateId" element={<TemplateDetailPage />} />
+        </Route>
+
         {/* Admin routes - requires admin access */}
         <Route path="/admin">
           <Route
@@ -145,6 +154,24 @@ function AppRoutes() {
               </ProtectedRoute>
             }
           />
+          <Route path="templates">
+            <Route
+              index
+              element={
+                <ProtectedRoute requiredPermission="canManageTemplates">
+                  <TemplateManagePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="categories"
+              element={
+                <ProtectedRoute requiredPermission="canManageTemplates">
+                  <TemplateCategoriesPage />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
         </Route>
 
         {/* Profile routes */}
@@ -153,6 +180,16 @@ function AppRoutes() {
           <Route path="password" element={<ChangePasswordPage />} />
         </Route>
       </Route>
+
+      {/* Template Fill Page - fullscreen, outside AppShell */}
+      <Route
+        path="/templates/:templateId/fill"
+        element={
+          <ProtectedRoute>
+            <TemplateFillPage />
+          </ProtectedRoute>
+        }
+      />
 
       {/* 404 */}
       <Route path="/404" element={<NotFoundPage />} />

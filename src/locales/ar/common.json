@@ -45,5 +45,19 @@
   "language": "اللغة",
   "arabic": "العربية",
   "french": "Français",
-  "ministryLogo": "شعار وزارة العدل"
+  "ministryLogo": "شعار وزارة العدل",
+  "category": "الفئة",
+  "categories": "الفئات",
+  "pages": "صفحات",
+  "templates": "النماذج",
+  "manageTemplates": "إدارة النماذج",
+  "fillTemplate": "ملء النموذج",
+  "view": "عرض",
+  "fill": "ملء",
+  "print": "طباعة",
+  "browseAndManageTemplates": "تصفح وإدارة نماذج PDF",
+  "noTemplatesFound": "لم يتم العثور على أي نماذج",
+  "templateNotFound": "النموذج غير موجود",
+  "backToTemplates": "العودة إلى النماذج",
+  "failedToLoadPDF": "فشل تحميل ملف PDF"
 }

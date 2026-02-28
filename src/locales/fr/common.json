@@ -45,5 +45,19 @@
   "language": "Langue",
   "arabic": "العربية",
   "french": "Français",
-  "ministryLogo": "Logo du Ministère de la Justice"
+  "ministryLogo": "Logo du Ministère de la Justice",
+  "category": "Catégorie",
+  "categories": "Catégories",
+  "pages": "pages",
+  "templates": "Modèles",
+  "manageTemplates": "Gérer les modèles",
+  "fillTemplate": "Remplir le modèle",
+  "view": "Afficher",
+  "fill": "Remplir",
+  "print": "Imprimer",
+  "browseAndManageTemplates": "Parcourir et gérer les modèles PDF",
+  "noTemplatesFound": "Aucun modèle trouvé",
+  "templateNotFound": "Modèle non trouvé",
+  "backToTemplates": "Retour aux modèles",
+  "failedToLoadPDF": "Impossible de charger le fichier PDF"
 }

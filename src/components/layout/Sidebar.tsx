@@ -9,8 +9,10 @@ import {
   Users,
   Building2,
   ScrollText,
+  FileText,
   ChevronLeft,
   ChevronRight,
+  Tag,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSidebar } from '@/contexts/SidebarContext'
@@ -61,6 +63,11 @@ const mainNavItems: NavItem[] = [
     icon: Search,
     labelKey: 'navigation:judgments',
   },
+  {
+    to: '/templates',
+    icon: FileText,
+    labelKey: 'navigation:templates',
+  },
 ]
 
 const adminNavItems: NavItem[] = [
@@ -81,6 +88,18 @@ const adminNavItems: NavItem[] = [
     icon: ScrollText,
     labelKey: 'navigation:auditLogs',
     permission: 'canAccessAdmin',
+  },
+  {
+    to: '/admin/templates',
+    icon: FileText,
+    labelKey: 'navigation:manageTemplates',
+    permission: 'canManageTemplates',
+  },
+  {
+    to: '/admin/templates/categories',
+    icon: Tag,
+    labelKey: 'templates:manageCategories',
+    permission: 'canManageTemplates',
   },
 ]
 

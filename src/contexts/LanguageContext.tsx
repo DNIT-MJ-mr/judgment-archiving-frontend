@@ -28,7 +28,7 @@ interface LanguageProviderProps {
 export function LanguageProvider({ children }: LanguageProviderProps) {
   const { i18n } = useTranslation()
   const [language, setLanguageState] = useState<Language>(() => {
-    const stored = localStorage.getItem(STORAGE_KEYS.LANGUAGE)
+    //const stored = localStorage.getItem(STORAGE_KEYS.LANGUAGE)
     return 'ar'// (stored as Language) || 'ar'
   })
 

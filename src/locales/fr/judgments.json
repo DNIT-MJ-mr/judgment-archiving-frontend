@@ -64,5 +64,14 @@
   "downloadSource": "Télécharger le fichier source",
   "judgmentInfo": "Informations du jugement",
   "extractionInfo": "Informations d'extraction",
-  "metadata": "Métadonnées"
+  "metadata": "Métadonnées",
+
+  "courtText": "Texte du tribunal",
+  "results": "résultat(s)",
+  "coreInformation": "Informations principales",
+  "classification": "Classification",
+  "sourceInformation": "Informations source",
+  "sourceType": "Type de source",
+  "recordId": "ID de l'enregistrement",
+  "documentPreview": "Aperçu du document"
 }

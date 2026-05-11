@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Copy,
   Eye,
+  ArrowRight,
 } from 'lucide-react'
 import { judgmentsApi, courtsApi, filesApi, usersApi } from '@/api'
 import { formatDate, formatDateTime } from '@/lib/utils'
@@ -26,6 +27,7 @@ import { StatusBadge } from '@/components/common/StatusBadge'
 import { ConfidenceBadge } from '@/components/common/ConfidenceBadge'
 import { DocumentPreview } from '@/components/data-entry/DocumentPreview'
 import { JudgmentAuditLogs } from '@/components/judgments/JudgmentAuditLogs'
+import { useLanguage } from '@/contexts'
 
 function DetailRow({
   label,
@@ -56,6 +58,7 @@ export function JudgmentDetailPage() {
   const { permissions, user } = useAuth()
   const id = parseInt(judgmentId || '0', 10)
   const [showPreview, setShowPreview] = useState(false)
+  const { language } = useLanguage()
 
   // Fetch judgment
   const {
@@ -112,7 +115,7 @@ export function JudgmentDetailPage() {
       <div className="flex h-64 flex-col items-center justify-center gap-4">
         <p className="text-destructive">{t('common:error')}</p>
         <Button onClick={() => navigate('/judgments')} variant="outline">
-          <ArrowLeft className="me-2 h-4 w-4" />
+          {language === 'ar' ? <ArrowRight className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
           {t('common:back')}
         </Button>
       </div>
@@ -153,7 +156,7 @@ export function JudgmentDetailPage() {
             size="icon"
             onClick={() => navigate('/judgments')}
           >
-            <ArrowLeft className="h-5 w-5" />
+            {language === 'ar' ? <ArrowRight className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
           </Button>
           <div>
             <div className="flex items-center gap-3 flex-wrap">

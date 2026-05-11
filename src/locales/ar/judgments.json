@@ -64,5 +64,14 @@
   "downloadSource": "تحميل الملف المصدر",
   "judgmentInfo": "معلومات الحكم",
   "extractionInfo": "معلومات الاستخراج",
-  "metadata": "البيانات الوصفية"
+  "metadata": "البيانات الوصفية",
+
+  "courtText": "نص المحكمة",
+  "results": "نتيجة",
+  "coreInformation": "المعلومات الأساسية",
+  "classification": "التصنيف",
+  "sourceInformation": "معلومات المصدر",
+  "sourceType": "نوع المصدر",
+  "recordId": "معرف السجل",
+  "documentPreview": "معاينة المستند"
 }

@@ -71,5 +71,9 @@
   "duplicatesFirst": "Doublons d'abord",
   "oldestFirst": "Plus anciens d'abord",
   "potentialDuplicates": "Doublons potentiels",
-  "onThisPage": "Sur cette page"
+  "onThisPage": "Sur cette page",
+
+  "readyToVerify": "Prêt à vérifier",
+  "sortedByPriority": "Trié par priorité",
+  "hasPotentialDuplicate": "Doublon potentiel détecté"
 }

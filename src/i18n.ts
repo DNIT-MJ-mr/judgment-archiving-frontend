@@ -15,6 +15,7 @@ import arProfile from './locales/ar/profile.json'
 import arUsers from './locales/ar/users.json'
 import arCourts from './locales/ar/courts.json'
 import arAdmin from './locales/ar/admin.json'
+import arTemplates from './locales/ar/templates.json'
 
 import frCommon from './locales/fr/common.json'
 import frAuth from './locales/fr/auth.json'
@@ -29,6 +30,7 @@ import frProfile from './locales/fr/profile.json'
 import frUsers from './locales/fr/users.json'
 import frCourts from './locales/fr/courts.json'
 import frAdmin from './locales/fr/admin.json'
+import frTemplates from './locales/fr/templates.json'
 
 export const resources = {
   ar: {
@@ -45,6 +47,7 @@ export const resources = {
     users: arUsers,
     courts: arCourts,
     admin: arAdmin,
+    templates: arTemplates,
   },
   fr: {
     common: frCommon,
@@ -60,6 +63,7 @@ export const resources = {
     users: frUsers,
     courts: frCourts,
     admin: frAdmin,
+    templates: frTemplates,
   },
 }
 
@@ -84,6 +88,7 @@ i18n
       'users',
       'courts',
       'admin',
+      'templates',
     ],
     interpolation: {
       escapeValue: false,

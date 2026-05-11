@@ -65,6 +65,7 @@
   "myUploadsPending": "Mes téléchargements en attente",
   "failedOnly": "Échecs uniquement",
   "needsReviewOnly": "À réviser uniquement",
+  "allCaughtUp": "Aucun élément en attente pour le moment",
   "stats": {
     "failed": "Extraction échouée",
     "needsReview": "Nécessite révision",

@@ -20,6 +20,8 @@
   "actions": "Actions",
   "status": "Statut",
   "date": "Date",
+  "user": "Utilisateur",
+  "action": "Action",
   "name": "Nom",
   "type": "Type",
   "details": "Détails",
@@ -59,5 +61,10 @@
   "noTemplatesFound": "Aucun modèle trouvé",
   "templateNotFound": "Modèle non trouvé",
   "backToTemplates": "Retour aux modèles",
-  "failedToLoadPDF": "Impossible de charger le fichier PDF"
+  "failedToLoadPDF": "Impossible de charger le fichier PDF",
+
+  "preview": "Aperçu",
+  "createdAt": "Date de création",
+  "updatedAt": "Date de mise à jour",
+  "saved": "Enregistré"
 }

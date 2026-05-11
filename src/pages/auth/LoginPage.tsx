@@ -66,21 +66,10 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-      {/* Language Toggle */}
-      <div className="absolute top-4 end-4">
-        {/* <Button
-          variant="outline"
-          size="sm"
-          onClick={toggleLanguage}
-        >
-          {language === 'ar' ? 'Français' : 'العربية'}
-        </Button> */}
-      </div>
-
+    <div className="h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4 overflow-hidden">
       {/* Logo and Header */}
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-mr-red">
+      <div className="mb-4 text-center">
+        <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-mr-red">
           <img
             src="/images/National_Seal_of_Mauritania.png"
             alt={t('ministryLogo', 'Ministry of Justice Logo')}
@@ -183,7 +172,7 @@ export function LoginPage() {
       </Card>
 
       {/* Footer */}
-      <p className="mt-8 text-center text-xs text-gray-500">
+      <p className="mt-4 text-center text-xs text-gray-500">
         {t('common:copyright')}
       </p>
     </div>

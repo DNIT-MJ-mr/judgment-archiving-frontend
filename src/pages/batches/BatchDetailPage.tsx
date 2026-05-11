@@ -20,6 +20,7 @@ import {
   ExternalLink,
   MoreHorizontal,
   Loader2,
+  ArrowRight,
 } from 'lucide-react'
 import { batchesApi } from '@/api'
 import { formatDate } from '@/lib/utils'
@@ -57,6 +58,7 @@ import { Progress } from '@/components/ui/progress'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { FileDropzone } from '@/components/batches/FileDropzone'
+import { useLanguage } from '@/contexts'
 
 export function BatchDetailPage() {
   const { t } = useTranslation(['batches', 'common', 'errors'])
@@ -71,6 +73,7 @@ export function BatchDetailPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
+  const { language } = useLanguage()
 
   // Fetch batch details
   const {
@@ -244,7 +247,7 @@ export function BatchDetailPage() {
             size="icon"
             onClick={() => navigate('/batches')}
           >
-            <ArrowLeft className="h-5 w-5" />
+            {language === 'ar' ? <ArrowRight className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
           </Button>
           <div>
             <h1 className="text-2xl font-bold">{batch.name}</h1>

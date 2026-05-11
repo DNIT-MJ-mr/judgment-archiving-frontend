@@ -95,12 +95,6 @@ const adminNavItems: NavItem[] = [
     labelKey: 'navigation:manageTemplates',
     permission: 'canManageTemplates',
   },
-  {
-    to: '/admin/templates/categories',
-    icon: Tag,
-    labelKey: 'templates:manageCategories',
-    permission: 'canManageTemplates',
-  },
 ]
 
 function NavItemComponent({

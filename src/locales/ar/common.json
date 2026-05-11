@@ -20,6 +20,8 @@
   "actions": "الإجراءات",
   "status": "الحالة",
   "date": "التاريخ",
+  "user": "المستخدم",
+  "action": "الإجراء",
   "name": "الاسم",
   "type": "النوع",
   "details": "التفاصيل",
@@ -59,5 +61,10 @@
   "noTemplatesFound": "لم يتم العثور على أي نماذج",
   "templateNotFound": "النموذج غير موجود",
   "backToTemplates": "العودة إلى النماذج",
-  "failedToLoadPDF": "فشل تحميل ملف PDF"
+  "failedToLoadPDF": "فشل تحميل ملف PDF",
+
+  "preview": "معاينة",
+  "createdAt": "تاريخ الإنشاء",
+  "updatedAt": "تاريخ التحديث",
+  "saved": "تم الحفظ"
 }

@@ -10,9 +10,11 @@ import {
   ChevronRight,
   RefreshCw,
   ArrowRight,
+  ArrowLeft,
   Filter,
 } from 'lucide-react'
 import { dataEntryApi } from '@/api'
+import { useLanguage } from '@/contexts'
 import { formatDate } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -29,6 +31,7 @@ import { ConfidenceBadge } from '@/components/common/ConfidenceBadge'
 
 export function DataEntryQueuePage() {
   const { t } = useTranslation(['dataEntry', 'common', 'judgments'])
+  const { language } = useLanguage()
   const navigate = useNavigate()
   const [statusFilter, setStatusFilter] = useState<'failed' | 'needs_review' | 'all'>('failed')
   const [page, setPage] = useState(1)
@@ -116,7 +119,7 @@ export function DataEntryQueuePage() {
           </Button>
           <Button onClick={handleGetNext}>
             {t('getNextItem')}
-            <ArrowRight className="ms-2 h-4 w-4" />
+            {language === 'ar' ? <ArrowLeft className="ms-2 h-4 w-4" /> : <ArrowRight className="ms-2 h-4 w-4" />}
           </Button>
         </div>
       </div>
@@ -253,7 +256,7 @@ export function DataEntryQueuePage() {
                     <div className="flex items-center gap-3 shrink-0">
                       <ConfidenceBadge score={item.confidence_score} />
                       <StatusBadge status={item.extraction_status} type="extraction" />
-                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                      {language === 'ar' ? <ArrowLeft className="h-4 w-4 text-muted-foreground" /> : <ArrowRight className="h-4 w-4 text-muted-foreground" />}
                     </div>
                   </div>
                 </CardContent>

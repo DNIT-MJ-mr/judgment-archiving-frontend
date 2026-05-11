@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
-import { Loader2, ArrowLeft, Upload, FolderPlus } from 'lucide-react'
+import { Loader2, ArrowLeft, Upload, FolderPlus, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { batchesApi } from '@/api'
 import { Button } from '@/components/ui/button'
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { FileDropzone } from '@/components/batches/FileDropzone'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type Step = 'create' | 'upload' | 'complete'
 
@@ -30,6 +31,7 @@ export function NewBatchPage() {
   const [batchId, setBatchId] = useState<number | null>(null)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadProgress, setUploadProgress] = useState(0)
+  const { language } = useLanguage()
 
   // Mutations
   const createBatchMutation = useMutation({
@@ -103,7 +105,7 @@ export function NewBatchPage() {
           size="icon"
           onClick={() => navigate('/batches')}
         >
-          <ArrowLeft className="h-5 w-5" />
+          {language === 'ar' ? <ArrowRight className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
         </Button>
         <div>
           <h1 className="text-2xl font-bold">{t('createBatch')}</h1>

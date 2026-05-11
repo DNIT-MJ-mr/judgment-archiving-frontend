@@ -186,20 +186,16 @@ export function TemplateManagePage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">{t('templates:manageTemplates')}</h1>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigate('/admin/templates/categories')}
-            title={t('templates:manageCategories')}
-          >
-            <UploadIcon className="h-4 w-4" />
-          </Button>
           <Button variant="outline" size="icon" onClick={() => refetch()}>
             <RefreshCw className="h-4 w-4" />
           </Button>
+          
           <Button onClick={() => setShowUploadDialog(true)}>
             <Plus className="me-2 h-4 w-4" />
-            {t('templates:uploadTemplates')}
+            {t('templates:manageCategories')}
+          </Button>
+          <Button onClick={() => navigate('/admin/templates/categories')}>
+            {t('templates:manageCategories')}
           </Button>
         </div>
       </div>

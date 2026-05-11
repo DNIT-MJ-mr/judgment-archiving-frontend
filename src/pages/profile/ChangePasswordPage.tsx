@@ -11,12 +11,14 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
+  ArrowRight,
 } from 'lucide-react'
 import { useState } from 'react'
 import { authApi } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 const passwordSchema = z.object({
   current_password: z.string().min(1, 'Current password is required'),
@@ -35,6 +37,7 @@ export function ChangePasswordPage() {
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const { language } = useLanguage()
 
   const {
     register,
@@ -78,7 +81,7 @@ export function ChangePasswordPage() {
           size="icon"
           onClick={() => navigate('/profile')}
         >
-          <ArrowLeft className="h-5 w-5" />
+          {language === 'ar' ? <ArrowRight className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
         </Button>
         <div>
           <h1 className="text-2xl font-bold">{t('changePassword')}</h1>

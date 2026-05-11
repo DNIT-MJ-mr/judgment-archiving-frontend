@@ -71,5 +71,9 @@
   "duplicatesFirst": "التكرارات أولاً",
   "oldestFirst": "الأقدم أولاً",
   "potentialDuplicates": "تكرارات محتملة",
-  "onThisPage": "في هذه الصفحة"
+  "onThisPage": "في هذه الصفحة",
+
+  "readyToVerify": "جاهز للتوثيق",
+  "sortedByPriority": "مرتب حسب الأولوية",
+  "hasPotentialDuplicate": "يحتوي على تكرار محتمل"
 }

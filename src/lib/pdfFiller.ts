@@ -1,69 +1,114 @@
-import { PDFDocument, rgb } from 'pdf-lib'
+import { PDFDocument } from 'pdf-lib'
 
 export interface FillTextBox {
   pageIndex: number
-  pdfX: number  // in PDF points, from left
-  pdfY: number  // in PDF points, from bottom
+  pdfX: number      // left edge of textbox, PDF points from page left
+  pdfY: number      // top edge of textbox, PDF points from page bottom
+  pdfWidth: number  // textbox width in PDF points (used for RTL right-edge alignment)
+  pdfHeight: number
   text: string
-  fontSize: number  // in points
+  fontSize: number  // in PDF points
   rtl: boolean
 }
 
+const PX_PER_PT = 96 / 72   // 1 PDF point = 1.3333 CSS px at 96 DPI
+const RENDER_SCALE = 3       // oversample for crisp rendering
+const FONT = "'Noto Sans Arabic', 'Noto Sans', Arial, sans-serif"
+
+interface RenderedText {
+  data: Uint8Array
+  widthPt: number
+  heightPt: number
+}
+
 /**
- * Generate a filled PDF by embedding text boxes at exact coordinates.
- *
- * @param pdfBytes - Original PDF binary (ArrayBuffer)
- * @param textBoxes - Array of text boxes with PDF coordinates
- * @returns - Filled PDF as Uint8Array
+ * Measure then render Arabic text to a PNG sized exactly to the text.
+ * The canvas is never stretched or squeezed — one canvas pixel maps
+ * 1:1 to (1 / PX_PER_PT / RENDER_SCALE) PDF points, so letter spacing
+ * is whatever the browser produces at that font size, unchanged.
  */
+async function renderText(text: string, fontSize: number): Promise<RenderedText | null> {
+  const fontPx = Math.round(fontSize * PX_PER_PT * RENDER_SCALE)
+  const fontSpec = `${fontPx}px ${FONT}`
+
+  try { await document.fonts.load(fontSpec) } catch { /* fallback to system */ }
+
+  // ── Step 1: measure real text width ──────────────────────────────────────
+  const ruler = document.createElement('canvas')
+  ruler.width = 8000   // wide enough for any text
+  ruler.height = fontPx * 2
+  const rc = ruler.getContext('2d')!
+  rc.font = fontSpec
+  rc.direction = 'rtl'
+  const textWidthPx = rc.measureText(text).width
+
+  // ── Step 2: canvas sized exactly to the text ──────────────────────────────
+  const padPx = Math.round(4 * RENDER_SCALE)   // small border so ascenders don't clip
+  const W = Math.ceil(textWidthPx) + padPx * 2
+  const H = Math.ceil(fontPx * 1.6) + padPx
+
+  const canvas = document.createElement('canvas')
+  canvas.width = W
+  canvas.height = H
+
+  const ctx = canvas.getContext('2d')!
+  ctx.font = fontSpec
+  ctx.fillStyle = '#000000'
+  ctx.textBaseline = 'top'
+  ctx.direction = 'rtl'
+  // anchor at right-pad so text fills leftward (correct for Arabic)
+  ctx.fillText(text, W - padPx, padPx)
+
+  // ── Step 3: convert canvas pixel dims back to PDF points ─────────────────
+  const widthPt  = W / (PX_PER_PT * RENDER_SCALE)
+  const heightPt = H / (PX_PER_PT * RENDER_SCALE)
+
+  return new Promise(resolve => {
+    canvas.toBlob(async blob => {
+      if (!blob) { resolve(null); return }
+      resolve({ data: new Uint8Array(await blob.arrayBuffer()), widthPt, heightPt })
+    }, 'image/png')
+  })
+}
+
 export async function generateFilledPdf(
   pdfBytes: ArrayBuffer,
   textBoxes: FillTextBox[]
 ): Promise<Uint8Array> {
-  try {
-    // Load the original PDF
-    const pdfDoc = await PDFDocument.load(pdfBytes)
+  const pdfDoc = await PDFDocument.load(pdfBytes)
+  const pages  = pdfDoc.getPages()
 
-    const pages = pdfDoc.getPages()
+  for (const box of textBoxes) {
+    if (!box.text.trim()) continue
+    if (box.pageIndex >= pages.length) continue
 
-    // Draw each text box on its respective page
-    for (const box of textBoxes) {
-      if (!box.text.trim()) continue
-      if (box.pageIndex >= pages.length) continue
+    const rendered = await renderText(box.text, box.fontSize)
+    if (!rendered) continue
 
-      const page = pages[box.pageIndex]
+    const img  = await pdfDoc.embedPng(rendered.data)
+    const page = pages[box.pageIndex]
 
-      // Use the Helvetica font (built-in, no embedding needed)
-      // pdf-lib uses bottom-left origin, so pdfY is already in the correct space
-      page.drawText(box.text, {
-        x: box.pdfX,
-        y: box.pdfY,  // already computed as points from bottom
-        size: box.fontSize,
-        color: rgb(0, 0, 0),
-        lineHeight: box.fontSize * 1.2,
-      })
-    }
+    // RTL: align image's right edge to the textbox's right edge
+    const rightEdge = box.pdfX + box.pdfWidth
+    const x = rightEdge - rendered.widthPt
+    // pdfY is the top of the textbox (from page bottom); drawImage y = bottom of image
+    const y = box.pdfY - rendered.heightPt
 
-    // Save and return the filled PDF
-    const filledBytes = await pdfDoc.save()
-    return filledBytes
-  } catch (error) {
-    console.error('Error generating filled PDF:', error)
-    throw new Error('Failed to generate filled PDF')
+    page.drawImage(img, {
+      x: Math.max(0, x),
+      y,
+      width:  rendered.widthPt,
+      height: rendered.heightPt,
+    })
   }
+
+  return await pdfDoc.save()
 }
 
-/**
- * Convert a fill text box to a downloadable blob URL.
- */
 export function createBlobUrl(pdfBytes: Uint8Array): string {
-  const blob = new Blob([pdfBytes], { type: 'application/pdf' })
-  return URL.createObjectURL(blob)
+  return URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }))
 }
 
-/**
- * Revoke a blob URL to free memory.
- */
 export function revokeBlobUrl(url: string): void {
   URL.revokeObjectURL(url)
 }

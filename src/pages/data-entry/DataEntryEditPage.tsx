@@ -15,6 +15,7 @@ import {
   Link as LinkIcon,
 } from 'lucide-react'
 import { dataEntryApi } from '@/api'
+import { useLanguage } from '@/contexts'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -37,6 +38,7 @@ import { JudgmentForm, JudgmentFormValues } from '@/components/data-entry/Judgme
 
 export function DataEntryEditPage() {
   const { t } = useTranslation(['dataEntry', 'judgments', 'common', 'errors'])
+  const { language } = useLanguage()
   const { judgmentId } = useParams<{ judgmentId: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -160,7 +162,7 @@ export function DataEntryEditPage() {
       <div className="flex h-64 flex-col items-center justify-center gap-4">
         <p className="text-destructive">{t('errors:judgmentNotFound')}</p>
         <Button onClick={() => navigate('/data-entry')} variant="outline">
-          <ArrowLeft className="me-2 h-4 w-4" />
+          {language === 'ar' ? <ArrowRight className="me-2 h-4 w-4" /> : <ArrowLeft className="me-2 h-4 w-4" />}
           {t('common:back')}
         </Button>
       </div>
@@ -195,7 +197,7 @@ export function DataEntryEditPage() {
             size="icon"
             onClick={() => navigate('/data-entry')}
           >
-            <ArrowLeft className="h-5 w-5" />
+            {language === 'ar' ? <ArrowRight className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
           </Button>
           <div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -232,7 +234,7 @@ export function DataEntryEditPage() {
             {getNextMutation.isPending ? (
               <Loader2 className="me-2 h-4 w-4 animate-spin" />
             ) : (
-              <ArrowRight className="me-2 h-4 w-4 rtl:rotate-180" />
+              language === 'ar' ? <ArrowRight className="me-2 h-4 w-4" /> : <ArrowLeft className="me-2 h-4 w-4" />
             )}
             {t('nextItem')}
           </Button>

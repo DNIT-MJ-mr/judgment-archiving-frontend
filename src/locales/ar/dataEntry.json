@@ -65,6 +65,7 @@
   "myUploadsPending": "تحميلاتي المعلقة",
   "failedOnly": "الفاشلة فقط",
   "needsReviewOnly": "بحاجة للمراجعة فقط",
+  "allCaughtUp": "لا توجد عناصر معلقة في الوقت الحالي",
   "stats": {
     "failed": "فشل الاستخراج",
     "needsReview": "تحتاج مراجعة",

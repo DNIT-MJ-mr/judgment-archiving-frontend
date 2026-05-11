@@ -9,6 +9,7 @@ import {
   Upload,
   ArrowRight,
   TrendingUp,
+  ArrowLeft,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { usePermissions } from '@/hooks/usePermissions'
@@ -18,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { StatusBadge } from '@/components/common/StatusBadge'
+import { useLanguage } from '@/contexts'
 
 function StatCard({
   title,
@@ -64,6 +66,7 @@ export function DashboardPage() {
   const { t } = useTranslation(['dashboard', 'common', 'navigation'])
   const { user } = useAuth()
   const permissions = usePermissions()
+  const { language } = useLanguage()
 
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ['dashboard-stats'],
@@ -208,7 +211,7 @@ export function DashboardPage() {
             <Button asChild variant="ghost" size="sm">
               <Link to="/batches">
                 {t('viewAll')}
-                <ArrowRight className="ms-1 h-4 w-4" />
+                {language === 'ar' ? <ArrowLeft className="me-2 h-4 w-4" /> : <ArrowRight className="me-2 h-4 w-4" />}
               </Link>
             </Button>
           </CardHeader>

@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { validationApi } from '@/api'
+import { useLanguage } from '@/contexts'
 import {
   ArrowLeft,
   ArrowRight,
@@ -16,7 +18,6 @@ import {
   Copy,
   Edit3,
 } from 'lucide-react'
-import { validationApi } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -38,6 +39,7 @@ import { DuplicateResolution } from '@/components/validation/DuplicateResolution
 
 export function ValidationDetailPage() {
   const { t } = useTranslation(['validation', 'judgments', 'common', 'errors'])
+  const { language } = useLanguage()
   const { judgmentId } = useParams<{ judgmentId: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -166,7 +168,7 @@ export function ValidationDetailPage() {
       <div className="flex h-64 flex-col items-center justify-center gap-4">
         <p className="text-destructive">{t('errors:judgmentNotFound')}</p>
         <Button onClick={() => navigate('/validation')} variant="outline">
-          <ArrowLeft className="me-2 h-4 w-4" />
+          {language === 'ar' ? <ArrowRight className="me-2 h-4 w-4" /> : <ArrowLeft className="me-2 h-4 w-4" />}
           {t('common:back')}
         </Button>
       </div>
@@ -188,7 +190,7 @@ export function ValidationDetailPage() {
             size="icon"
             onClick={() => navigate('/validation')}
           >
-            <ArrowLeft className="h-5 w-5" />
+            {language === 'ar' ? <ArrowRight className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
           </Button>
           <div>
             <div className="flex items-center gap-3 flex-wrap">
@@ -234,7 +236,7 @@ export function ValidationDetailPage() {
             variant="outline"
             onClick={handleNext}
           >
-            <ArrowRight className="me-2 h-4 w-4 rtl:rotate-180" />
+            {language === 'ar' ? <ArrowRight className="me-2 h-4 w-4" /> : <ArrowLeft className="me-2 h-4 w-4" />}
             {t('skip')}
           </Button>
         </div>

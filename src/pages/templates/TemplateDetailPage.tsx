@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft, Download, Printer, Edit2 } from 'lucide-react'
+import { ArrowLeft, Download, Printer, Edit2, ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { templatesApi, apiClient } from '@/api'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { Badge } from '@/components/ui/badge'
 import { usePermissions } from '@/hooks/usePermissions'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export function TemplateDetailPage() {
   const { t } = useTranslation(['common'])
@@ -17,6 +18,7 @@ export function TemplateDetailPage() {
   const { canManageTemplates } = usePermissions()
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null)
   const [pdfLoading, setPdfLoading] = useState(false)
+  const { language } = useLanguage()
 
   const {
     data: template,
@@ -115,7 +117,7 @@ export function TemplateDetailPage() {
           onClick={() => navigate('/templates')}
           className="rtl:text-right ltr:text-left"
         >
-          <ArrowLeft className="h-4 w-4 rtl:ml-2 ltr:mr-2" />
+          {language === 'ar' ? <ArrowRight className="h-4 w-4 rtl:ml-2 ltr:mr-2" /> : <ArrowLeft className="h-4 w-4 rtl:ml-2 ltr:mr-2" />}
           {t('common:back')}
         </Button>
       </div>

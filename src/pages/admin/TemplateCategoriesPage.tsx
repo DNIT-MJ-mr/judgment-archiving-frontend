@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Plus, Edit, Trash2, RefreshCw, Search, ArrowLeft } from 'lucide-react'
+import { Plus, Edit, Trash2, RefreshCw, Search, ArrowLeft, ArrowRight } from 'lucide-react'
 import { templatesApi } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,6 +38,7 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { TemplateCategory } from '@/lib/types'
 import { useNavigate } from 'react-router-dom'
 import { Textarea } from '@/components/ui/textarea'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface CategoryFormData {
   name: string
@@ -52,6 +53,7 @@ export function TemplateCategoriesPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editingCategory, setEditingCategory] = useState<TemplateCategory | null>(null)
   const [deletingCategory, setDeletingCategory] = useState<TemplateCategory | null>(null)
+  const { language } = useLanguage()
 
   // Form state
   const [formData, setFormData] = useState<CategoryFormData>({
@@ -177,7 +179,7 @@ export function TemplateCategoriesPage() {
               onClick={() => navigate('/admin/templates')}
               className="me-2"
             >
-              <ArrowLeft className="h-4 w-4" />
+              {language === 'ar' ? <ArrowRight className="me-2 h-4 w-4" /> : <ArrowLeft className="me-2 h-4 w-4" />}
             </Button>
             <h1 className="text-2xl font-bold">{t('templates:manageCategories')}</h1>
           </div>

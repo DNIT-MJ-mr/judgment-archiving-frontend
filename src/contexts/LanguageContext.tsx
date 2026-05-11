@@ -29,15 +29,15 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const { i18n } = useTranslation()
   const [language, setLanguageState] = useState<Language>(() => {
     const stored = localStorage.getItem(STORAGE_KEYS.LANGUAGE)
-    return (stored as Language) || 'ar'
+    return 'ar'// (stored as Language) || 'ar'
   })
 
-  const direction: Direction = language === 'ar' ? 'rtl' : 'ltr'
+  const direction: Direction = 'rtl' //language === 'ar' ? 'rtl' : 'ltr'
 
   useEffect(() => {
     // Update i18n language
     i18n.changeLanguage(language)
-    
+    console.log('language:', language)
     // Update localStorage
     localStorage.setItem(STORAGE_KEYS.LANGUAGE, language)
     

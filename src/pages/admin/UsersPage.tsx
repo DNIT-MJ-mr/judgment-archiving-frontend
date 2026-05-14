@@ -71,16 +71,13 @@ export function UsersPage() {
   // Users query state
   const [users, setUsers] = useState<User[] | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
 
   const fetchUsers = useCallback(async () => {
     setIsLoading(true)
-    setError(null)
     try {
       const result = await usersApi.list()
       setUsers(result)
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error'))
     } finally {
       setIsLoading(false)
     }
@@ -109,7 +106,6 @@ export function UsersPage() {
   // Mutation loading states
   const [isCreating, setIsCreating] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
 
   const resetForm = () => {
     setFormData({
@@ -169,7 +165,6 @@ export function UsersPage() {
   }
 
   const handleDelete = async (id: number) => {
-    setIsDeleting(true)
     try {
       await usersApi.delete(id)
       toast.success(t('userDeleted'))
@@ -177,8 +172,6 @@ export function UsersPage() {
       setDeletingUser(null)
     } catch (error: any) {
       toast.error(error.response?.data?.detail || t('common:error'))
-    } finally {
-      setIsDeleting(false)
     }
   }
 

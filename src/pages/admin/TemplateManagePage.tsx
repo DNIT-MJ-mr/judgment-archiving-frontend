@@ -110,7 +110,6 @@ export function TemplateManagePage() {
   // Mutation loading states
   const [isUploading, setIsUploading] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
 
   const resetForm = () => {
     setFormData({
@@ -170,7 +169,6 @@ export function TemplateManagePage() {
   }
 
   const handleDelete = async (id: number) => {
-    setIsDeleting(true)
     try {
       await templatesApi.delete(id)
       toast.success(t('templates:templateDeleted'))
@@ -178,8 +176,6 @@ export function TemplateManagePage() {
       setDeletingTemplate(null)
     } catch (error: any) {
       toast.error(error.response?.data?.detail || t('templates:errorDeletingTemplate'))
-    } finally {
-      setIsDeleting(false)
     }
   }
 

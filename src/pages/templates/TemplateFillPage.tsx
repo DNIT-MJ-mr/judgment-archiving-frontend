@@ -57,7 +57,6 @@ export function TemplateFillPage() {
 
   const [template, setTemplate] = useState<Awaited<ReturnType<typeof templatesApi.get>> | null>(null)
   const [templateLoading, setTemplateLoading] = useState(true)
-  const [templateError, setTemplateError] = useState<Error | null>(null)
 
   const canvasRefs = useRef<Map<number, HTMLCanvasElement | null>>(new Map())
   const containerRefs = useRef<Map<number, HTMLDivElement | null>>(new Map())
@@ -67,12 +66,11 @@ export function TemplateFillPage() {
   const fetchTemplate = useCallback(async () => {
     if (!templateId) return
     setTemplateLoading(true)
-    setTemplateError(null)
     try {
       const result = await templatesApi.get(+templateId)
       setTemplate(result)
     } catch (err) {
-      setTemplateError(err instanceof Error ? err : new Error('Unknown error'))
+      // setTemplateError(err instanceof Error ? err : new Error('Unknown error'))
     } finally {
       setTemplateLoading(false)
     }

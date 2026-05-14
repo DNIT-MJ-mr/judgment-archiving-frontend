@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { templatesApi } from '@/api'
 import { Button } from '@/components/ui/button'
@@ -16,17 +15,43 @@ export function TemplatesPage() {
   const [page, setPage] = useState(1)
   const pageSize = 20
 
-  // Fetch categories
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
-    queryKey: ['templateCategories'],
-    queryFn: () => templatesApi.listCategories(),
-  })
+  const [categories, setCategories] = useState<Awaited<ReturnType<typeof templatesApi.listCategories>>>([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
 
-  // Fetch templates
-  const { data: templatesData, isLoading: templatesLoading } = useQuery({
-    queryKey: ['templates', page, search, categoryId],
-    queryFn: () => templatesApi.list(page, pageSize, search || undefined, categoryId || undefined),
-  })
+  const [templatesData, setTemplatesData] = useState<Awaited<ReturnType<typeof templatesApi.list>> | null>(null)
+  const [templatesLoading, setTemplatesLoading] = useState(true)
+
+  const fetchCategories = useCallback(async () => {
+    setCategoriesLoading(true)
+    try {
+      const result = await templatesApi.listCategories()
+      setCategories(result)
+    } catch (err) {
+      setCategories([])
+    } finally {
+      setCategoriesLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
+
+  const fetchTemplates = useCallback(async () => {
+    setTemplatesLoading(true)
+    try {
+      const result = await templatesApi.list(page, pageSize, search || undefined, categoryId || undefined)
+      setTemplatesData(result)
+    } catch (err) {
+      setTemplatesData(null)
+    } finally {
+      setTemplatesLoading(false)
+    }
+  }, [page, search, categoryId])
+
+  useEffect(() => {
+    fetchTemplates()
+  }, [fetchTemplates])
 
   const isLoading = categoriesLoading || templatesLoading
   const templates = templatesData?.data || []

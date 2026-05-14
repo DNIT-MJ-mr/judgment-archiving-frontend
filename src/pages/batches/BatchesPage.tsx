@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   Plus,
@@ -50,52 +49,71 @@ import { StatusBadge } from '@/components/common/StatusBadge'
 
 export function BatchesPage() {
   const { t } = useTranslation(['batches', 'common'])
-  const queryClient = useQueryClient()
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null)
 
-  const {
-    data: batches,
-    isLoading,
-    error,
-    refetch,
-    isFetching,
-  } = useQuery({
-    queryKey: ['batches', statusFilter],
-    queryFn: () =>
-      batchesApi.list(statusFilter !== 'all' ? { status: statusFilter } : undefined),
-    refetchInterval: (data: any) => {
-      // Check if data is an array and if any batch is processing
-      const hasProcessing = Array.isArray(data) && data.some((batch: any) => batch.is_processing)
-      // Refetch every 5 seconds if processing, otherwise stop
-      return hasProcessing ? 5000 : false
-    },
-    refetchOnMount: false,
-  })
+  const [batches, setBatches] = useState<any[] | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [isFetching, setIsFetching] = useState(false)
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => batchesApi.delete(id),
-    onSuccess: () => {
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const fetchBatches = useCallback(async () => {
+    setIsFetching(true)
+    setError(null)
+    try {
+      const result = await batchesApi.list(statusFilter !== 'all' ? { status: statusFilter } : undefined)
+      setBatches(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+      setIsFetching(false)
+    }
+  }, [statusFilter])
+
+  useEffect(() => {
+    setIsLoading(true)
+    fetchBatches()
+  }, [fetchBatches])
+
+  const isPolling = batches?.some((b: any) => b.is_processing) ?? false
+
+  useEffect(() => {
+    if (!isPolling) return
+    const id = setInterval(fetchBatches, 5000)
+    return () => clearInterval(id)
+  }, [isPolling, fetchBatches])
+
+  const handleDelete = async (id: number) => {
+    setIsDeleting(true)
+    try {
+      await batchesApi.delete(id)
       toast.success(t('common:success'))
-      queryClient.invalidateQueries({ queryKey: ['batches'] })
       setDeleteTarget(null)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
+      await fetchBatches()
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('common:error'))
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
-  const processMutation = useMutation({
-    mutationFn: (id: number) => batchesApi.process(id),
-    onSuccess: () => {
+  const handleProcess = async (id: number) => {
+    setIsProcessing(true)
+    try {
+      await batchesApi.process(id)
       toast.success(t('processingStarted'))
-      queryClient.invalidateQueries({ queryKey: ['batches'] })
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
+      await fetchBatches()
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('common:error'))
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
   const filteredBatches = batches?.filter((batch) => {
     if (!searchQuery) return true
@@ -126,7 +144,7 @@ export function BatchesPage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-4">
         <p className="text-destructive">{t('common:error')}</p>
-        <Button onClick={() => refetch()} variant="outline">
+        <Button onClick={() => fetchBatches()} variant="outline">
           <RefreshCw className="me-2 h-4 w-4" />
           {t('common:refresh')}
         </Button>
@@ -148,7 +166,7 @@ export function BatchesPage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => refetch()}
+            onClick={() => fetchBatches()}
             disabled={isFetching}
           >
             <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
@@ -279,8 +297,8 @@ export function BatchesPage() {
                         </DropdownMenuItem>
                         {batch.status === 'uploading' && batch.total_files > 0 && (
                           <DropdownMenuItem
-                            onClick={() => processMutation.mutate(batch.id)}
-                            disabled={processMutation.isPending}
+                            onClick={() => handleProcess(batch.id)}
+                            disabled={isProcessing}
                           >
                             <Play className="me-2 h-4 w-4" />
                             {t('startProcessing')}
@@ -333,8 +351,9 @@ export function BatchesPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common:cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget)}
+              onClick={() => deleteTarget && handleDelete(deleteTarget)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
             >
               {t('common:delete')}
             </AlertDialogAction>

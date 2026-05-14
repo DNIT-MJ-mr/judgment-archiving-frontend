@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import {
   FileCheck,
   AlertTriangle,
@@ -25,22 +24,31 @@ export function ValidationQueuePage() {
   const [page, setPage] = useState(1)
   const pageSize = 20
 
-  // Fetch queue
-  const {
-    data: queueData,
-    isLoading,
-    error,
-    refetch,
-    isFetching,
-  } = useQuery({
-    queryKey: ['validation-queue', page],
-    queryFn: () =>
-      validationApi.getQueue({
+  const [queueData, setQueueData] = useState<Awaited<ReturnType<typeof validationApi.getQueue>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [isFetching, setIsFetching] = useState(false)
+
+  const fetchQueue = useCallback(async () => {
+    setIsFetching(true)
+    setError(null)
+    try {
+      const result = await validationApi.getQueue({
         page,
         page_size: pageSize,
-      }),
-    refetchOnMount: false,
-  })
+      })
+      setQueueData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+      setIsFetching(false)
+    }
+  }, [page])
+
+  useEffect(() => {
+    fetchQueue()
+  }, [fetchQueue])
 
   // Get next item handler
   const handleGetNext = async () => {
@@ -66,7 +74,7 @@ export function ValidationQueuePage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-4">
         <p className="text-destructive">{t('common:error')}</p>
-        <Button onClick={() => refetch()} variant="outline">
+        <Button onClick={() => fetchQueue()} variant="outline">
           <RefreshCw className="me-2 h-4 w-4" />
           {t('common:refresh')}
         </Button>
@@ -95,7 +103,7 @@ export function ValidationQueuePage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => refetch()}
+            onClick={() => fetchQueue()}
             disabled={isFetching}
           >
             <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
@@ -162,8 +170,8 @@ export function ValidationQueuePage() {
                     {/* Item Info */}
                     <div className="flex items-start gap-4 min-w-0 flex-1">
                       <div className={`rounded-lg p-3 shrink-0 ${
-                        item.has_duplicate 
-                          ? 'bg-mr-gold/10' 
+                        item.has_duplicate
+                          ? 'bg-mr-gold/10'
                           : 'bg-mr-green/10'
                       }`}>
                         {item.has_duplicate ? (

@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   ArrowLeft,
@@ -64,7 +63,6 @@ export function BatchDetailPage() {
   const { t } = useTranslation(['batches', 'common', 'errors'])
   const { batchId } = useParams<{ batchId: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const id = parseInt(batchId || '0', 10)
 
   // State
@@ -75,107 +73,133 @@ export function BatchDetailPage() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const { language } = useLanguage()
 
-  // Fetch batch details
-  const {
-    data: batch,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ['batch', id],
-    queryFn: () => batchesApi.getDetails(id),
-    enabled: !!id,
-    refetchInterval: (data: any) => (data?.is_processing ? 3000 : false),
-    refetchOnMount: false,
-  })
+  const [batch, setBatch] = useState<any | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  // Mutations
-  const uploadMutation = useMutation({
-    mutationFn: async (files: File[]) => {
+  const [isUploading, setIsUploading] = useState(false)
+  const [isStartingProcess, setIsStartingProcess] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
+  const [isRetryingAll, setIsRetryingAll] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isRetryingFile, setIsRetryingFile] = useState(false)
+
+  const fetchBatch = useCallback(async () => {
+    if (!id) return
+    setError(null)
+    try {
+      const result = await batchesApi.getDetails(id)
+      setBatch(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [id])
+
+  useEffect(() => {
+    fetchBatch()
+  }, [fetchBatch])
+
+  const isPolling = batch?.is_processing ?? false
+
+  useEffect(() => {
+    if (!isPolling) return
+    const interval = setInterval(fetchBatch, 3000)
+    return () => clearInterval(interval)
+  }, [isPolling, fetchBatch])
+
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) return
+    setIsUploading(true)
+    setUploadProgress(0)
+    try {
       const chunkSize = 5
       let uploaded = 0
-      for (let i = 0; i < files.length; i += chunkSize) {
-        const chunk = files.slice(i, i + chunkSize)
+      for (let i = 0; i < selectedFiles.length; i += chunkSize) {
+        const chunk = selectedFiles.slice(i, i + chunkSize)
         await batchesApi.uploadFiles(id, chunk)
         uploaded += chunk.length
-        setUploadProgress(Math.round((uploaded / files.length) * 100))
+        setUploadProgress(Math.round((uploaded / selectedFiles.length) * 100))
       }
-    },
-    onSuccess: () => {
       toast.success(t('filesUploaded'))
       setShowUploadDialog(false)
       setSelectedFiles([])
       setUploadProgress(0)
-      queryClient.invalidateQueries({ queryKey: ['batch', id] })
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:fileUploadFailed'))
-    },
-  })
-
-  const processMutation = useMutation({
-    mutationFn: () => batchesApi.process(id),
-    onSuccess: () => {
-      toast.success(t('processingStarted'))
-      queryClient.invalidateQueries({ queryKey: ['batch', id] })
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
-
-  const cancelMutation = useMutation({
-    mutationFn: () => batchesApi.cancel(id),
-    onSuccess: () => {
-      toast.success(t('processingCancelled'))
-      queryClient.invalidateQueries({ queryKey: ['batch', id] })
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
-
-  const retryAllMutation = useMutation({
-    mutationFn: () => batchesApi.retryAllFailed(id, true),
-    onSuccess: () => {
-      toast.success(t('retryStarted'))
-      queryClient.invalidateQueries({ queryKey: ['batch', id] })
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: () => batchesApi.delete(id),
-    onSuccess: () => {
-      toast.success(t('batchDeleted'))
-      navigate('/batches')
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
-
-  const retryFileMutation = useMutation({
-    mutationFn: (fileId: number) => batchesApi.retryFile(id, fileId),
-    onSuccess: () => {
-      toast.success(t('common:success'))
-      queryClient.invalidateQueries({ queryKey: ['batch', id] })
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
-
-  // Handlers
-  const handleUpload = () => {
-    if (selectedFiles.length > 0) {
-      setUploadProgress(0)
-      uploadMutation.mutate(selectedFiles)
+      await fetchBatch()
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('errors:fileUploadFailed'))
+    } finally {
+      setIsUploading(false)
     }
   }
 
+  const handleProcess = async () => {
+    setIsStartingProcess(true)
+    try {
+      await batchesApi.process(id)
+      toast.success(t('processingStarted'))
+      await fetchBatch()
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsStartingProcess(false)
+    }
+  }
+
+  const handleCancel = async () => {
+    setIsCancelling(true)
+    try {
+      await batchesApi.cancel(id)
+      toast.success(t('processingCancelled'))
+      await fetchBatch()
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
+  const handleRetryAll = async () => {
+    setIsRetryingAll(true)
+    try {
+      await batchesApi.retryAllFailed(id, true)
+      toast.success(t('retryStarted'))
+      await fetchBatch()
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsRetryingAll(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    try {
+      await batchesApi.delete(id)
+      toast.success(t('batchDeleted'))
+      navigate('/batches')
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleRetryFile = async (fileId: number) => {
+    setIsRetryingFile(true)
+    try {
+      await batchesApi.retryFile(id, fileId)
+      toast.success(t('common:success'))
+      await fetchBatch()
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsRetryingFile(false)
+    }
+  }
+
+  // Handlers
   const handleRemoveFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
   }
@@ -270,7 +294,7 @@ export function BatchDetailPage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => refetch()}
+            onClick={() => fetchBatch()}
           >
             <RefreshCw className="h-4 w-4" />
           </Button>
@@ -286,7 +310,7 @@ export function BatchDetailPage() {
           )}
 
           {canProcess && (
-            <Button onClick={() => processMutation.mutate()}>
+            <Button onClick={handleProcess} disabled={isStartingProcess}>
               <Play className="me-2 h-4 w-4" />
               {t('startProcessing')}
             </Button>
@@ -295,7 +319,8 @@ export function BatchDetailPage() {
           {batch.is_processing && (
             <Button
               variant="destructive"
-              onClick={() => cancelMutation.mutate()}
+              onClick={handleCancel}
+              disabled={isCancelling}
             >
               <Pause className="me-2 h-4 w-4" />
               {t('cancelProcessing')}
@@ -305,7 +330,8 @@ export function BatchDetailPage() {
           {hasFailed && !batch.is_processing && (
             <Button
               variant="outline"
-              onClick={() => retryAllMutation.mutate()}
+              onClick={handleRetryAll}
+              disabled={isRetryingAll}
             >
               <RotateCcw className="me-2 h-4 w-4" />
               {t('retryFailed')}
@@ -452,8 +478,8 @@ export function BatchDetailPage() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => retryFileMutation.mutate(file.id)}
-                        disabled={retryFileMutation.isPending || batch.is_processing}
+                        onClick={() => handleRetryFile(file.id)}
+                        disabled={isRetryingFile || batch.is_processing}
                       >
                         <RotateCcw className="h-4 w-4" />
                       </Button>
@@ -486,10 +512,10 @@ export function BatchDetailPage() {
             onFilesSelected={setSelectedFiles}
             selectedFiles={selectedFiles}
             onRemoveFile={handleRemoveFile}
-            disabled={uploadMutation.isPending}
+            disabled={isUploading}
           />
 
-          {uploadMutation.isPending && (
+          {isUploading && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span>{t('uploading')}</span>
@@ -505,15 +531,15 @@ export function BatchDetailPage() {
                 setSelectedFiles([])
                 setUploadProgress(0)
               }}
-              disabled={uploadMutation.isPending}
+              disabled={isUploading}
             >
               {t('common:cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleUpload}
-              disabled={selectedFiles.length === 0 || uploadMutation.isPending}
+              disabled={selectedFiles.length === 0 || isUploading}
             >
-              {uploadMutation.isPending ? (
+              {isUploading ? (
                 <>
                   <Loader2 className="me-2 h-4 w-4 animate-spin" />
                   {uploadProgress}%
@@ -541,8 +567,9 @@ export function BatchDetailPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common:cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteMutation.mutate()}
+              onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
             >
               {t('common:delete')}
             </AlertDialogAction>

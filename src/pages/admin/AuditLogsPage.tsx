@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
 import {
   History,
   RefreshCw,
@@ -172,23 +171,32 @@ export function AuditLogsPage() {
   const [search, setSearch] = useState('')
   const pageSize = 20
 
-  // Fetch audit logs
-  const {
-    data: logsData,
-    isLoading,
-    error,
-    refetch,
-    isFetching,
-  } = useQuery<AuditLogsResponse>({
-    queryKey: ['audit-logs', page, entityType],
-    queryFn: () =>
-      auditLogsApi.list({
+  const [logsData, setLogsData] = useState<AuditLogsResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [isFetching, setIsFetching] = useState(false)
+
+  const fetchLogs = useCallback(async () => {
+    setIsFetching(true)
+    setError(null)
+    try {
+      const result = await auditLogsApi.list({
         page,
         page_size: pageSize,
         entity_type: entityType || undefined,
-      }),
-    refetchOnMount: false,
-  })
+      })
+      setLogsData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+      setIsFetching(false)
+    }
+  }, [page, entityType])
+
+  useEffect(() => {
+    fetchLogs()
+  }, [fetchLogs])
 
   const logs = logsData?.items || []
   const total = logsData?.total || 0
@@ -208,7 +216,7 @@ export function AuditLogsPage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-4">
         <p className="text-destructive">{t('common:error')}</p>
-        <Button onClick={() => refetch()} variant="outline">
+        <Button onClick={() => fetchLogs()} variant="outline">
           <RefreshCw className="me-2 h-4 w-4" />
           {t('common:refresh')}
         </Button>
@@ -227,7 +235,7 @@ export function AuditLogsPage() {
         <Button
           variant="outline"
           size="icon"
-          onClick={() => refetch()}
+          onClick={() => fetchLogs()}
           disabled={isFetching}
         >
           <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />

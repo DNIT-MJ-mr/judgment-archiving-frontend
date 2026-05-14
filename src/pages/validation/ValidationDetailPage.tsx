@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { validationApi } from '@/api'
 import { useLanguage } from '@/contexts'
@@ -42,88 +41,42 @@ export function ValidationDetailPage() {
   const { language } = useLanguage()
   const { judgmentId } = useParams<{ judgmentId: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const id = parseInt(judgmentId || '0', 10)
 
   const [showPreview, setShowPreview] = useState(true)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
 
-  // Fetch judgment details
-  const {
-    data: judgment,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ['validation-detail', id],
-    queryFn: () => validationApi.getDetail(id),
-    enabled: !!id,
-  })
+  // Judgment query state
+  const [judgment, setJudgment] = useState<Awaited<ReturnType<typeof validationApi.getDetail>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  // Verify mutation
-  const verifyMutation = useMutation({
-    mutationFn: () => validationApi.verify(id),
-    onSuccess: () => {
-      toast.success(t('verifiedSuccessfully'))
-      queryClient.invalidateQueries({ queryKey: ['validation-queue'] })
-      handleNext()
-    },
-    onError: (error: any) => {
-      const detail = error.response?.data?.detail
-      toast.error(typeof detail === 'string' ? detail : t('errors:generic'))
-    },
-  })
+  const fetchJudgment = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await validationApi.getDetail(id)
+      setJudgment(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [id])
 
-  // Send to data entry mutation
-  const sendToDataEntryMutation = useMutation({
-    mutationFn: () => validationApi.sendToDataEntry(id),
-    onSuccess: () => {
-      toast.success(t('sentToDataEntry'))
-      queryClient.invalidateQueries({ queryKey: ['validation-queue'] })
-      handleNext()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
+  useEffect(() => {
+    if (id) {
+      fetchJudgment()
+    }
+  }, [fetchJudgment, id])
 
-  // Update fields mutation
-  const updateMutation = useMutation({
-    mutationFn: (data: Record<string, any>) => validationApi.update(id, data),
-    onSuccess: () => {
-      toast.success(t('common:saved'))
-      refetch()
-      setIsEditing(false)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
-
-  // Confirm duplicate mutation
-  const confirmDuplicateMutation = useMutation({
-    mutationFn: (primaryId: number) => validationApi.confirmDuplicate(id, primaryId),
-    onSuccess: () => {
-      toast.success(t('duplicateConfirmed'))
-      refetch()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
-
-  // Dismiss duplicate mutation
-  const dismissDuplicateMutation = useMutation({
-    mutationFn: () => validationApi.dismissDuplicate(id),
-    onSuccess: () => {
-      toast.success(t('duplicateDismissed'))
-      refetch()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
+  // Mutation loading states
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [isSendingToDataEntry, setIsSendingToDataEntry] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isConfirmingDuplicate, setIsConfirmingDuplicate] = useState(false)
+  const [isDismissingDuplicate, setIsDismissingDuplicate] = useState(false)
 
   // Get next item
   const handleNext = async () => {
@@ -141,18 +94,77 @@ export function ValidationDetailPage() {
   }
 
   // Handle verify
-  const handleVerify = () => {
+  const handleVerify = async () => {
     if (judgment?.duplicate_of_id) {
       toast.error(t('resolveDuplicateFirst'))
       return
     }
-    verifyMutation.mutate()
+    setIsVerifying(true)
+    try {
+      await validationApi.verify(id)
+      toast.success(t('verifiedSuccessfully'))
+      await handleNext()
+    } catch (error: any) {
+      const detail = error.response?.data?.detail
+      toast.error(typeof detail === 'string' ? detail : t('errors:generic'))
+    } finally {
+      setIsVerifying(false)
+    }
   }
 
   // Handle reject (send to data entry)
-  const handleReject = () => {
+  const handleReject = async () => {
     setShowRejectDialog(false)
-    sendToDataEntryMutation.mutate()
+    setIsSendingToDataEntry(true)
+    try {
+      await validationApi.sendToDataEntry(id)
+      toast.success(t('sentToDataEntry'))
+      await handleNext()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsSendingToDataEntry(false)
+    }
+  }
+
+  const handleUpdate = async (data: Record<string, any>) => {
+    setIsSaving(true)
+    try {
+      await validationApi.update(id, data)
+      toast.success(t('common:saved'))
+      await fetchJudgment()
+      setIsEditing(false)
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleConfirmDuplicate = async (primaryId: number) => {
+    setIsConfirmingDuplicate(true)
+    try {
+      await validationApi.confirmDuplicate(id, primaryId)
+      toast.success(t('duplicateConfirmed'))
+      await fetchJudgment()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsConfirmingDuplicate(false)
+    }
+  }
+
+  const handleDismissDuplicate = async () => {
+    setIsDismissingDuplicate(true)
+    try {
+      await validationApi.dismissDuplicate(id)
+      toast.success(t('duplicateDismissed'))
+      await fetchJudgment()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsDismissingDuplicate(false)
+    }
   }
 
   if (isLoading) {
@@ -270,10 +282,10 @@ export function ValidationDetailPage() {
               <CardContent>
                 <DuplicateResolution
                   duplicateOfId={judgment.duplicate_of_id!}
-                  onConfirm={(primaryId) => confirmDuplicateMutation.mutate(primaryId)}
-                  onDismiss={() => dismissDuplicateMutation.mutate()}
-                  isConfirming={confirmDuplicateMutation.isPending}
-                  isDismissing={dismissDuplicateMutation.isPending}
+                  onConfirm={(primaryId) => handleConfirmDuplicate(primaryId)}
+                  onDismiss={() => handleDismissDuplicate()}
+                  isConfirming={isConfirmingDuplicate}
+                  isDismissing={isDismissingDuplicate}
                 />
               </CardContent>
             </Card>
@@ -292,8 +304,8 @@ export function ValidationDetailPage() {
                 fields={fields}
                 confidence={confidence}
                 isEditing={isEditing}
-                onSave={(data) => updateMutation.mutate(data)}
-                isSaving={updateMutation.isPending}
+                onSave={(data) => handleUpdate(data)}
+                isSaving={isSaving}
               />
             </CardContent>
           </Card>
@@ -304,9 +316,9 @@ export function ValidationDetailPage() {
               variant="outline"
               className="text-mr-red hover:text-mr-red"
               onClick={() => setShowRejectDialog(true)}
-              disabled={sendToDataEntryMutation.isPending}
+              disabled={isSendingToDataEntry}
             >
-              {sendToDataEntryMutation.isPending ? (
+              {isSendingToDataEntry ? (
                 <Loader2 className="me-2 h-4 w-4 animate-spin" />
               ) : (
                 <XCircle className="me-2 h-4 w-4" />
@@ -316,9 +328,9 @@ export function ValidationDetailPage() {
             <Button
               className="bg-mr-green hover:bg-mr-green/90"
               onClick={handleVerify}
-              disabled={verifyMutation.isPending || hasDuplicate}
+              disabled={isVerifying || hasDuplicate}
             >
-              {verifyMutation.isPending ? (
+              {isVerifying ? (
                 <Loader2 className="me-2 h-4 w-4 animate-spin" />
               ) : (
                 <CheckCircle className="me-2 h-4 w-4" />

@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Plus, Edit, Trash2, RefreshCw, Search, ArrowLeft, ArrowRight } from 'lucide-react'
 import { templatesApi } from '@/api'
@@ -48,7 +47,6 @@ interface CategoryFormData {
 export function TemplateCategoriesPage() {
   const { t } = useTranslation(['templates', 'common'])
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editingCategory, setEditingCategory] = useState<TemplateCategory | null>(null)
@@ -61,58 +59,29 @@ export function TemplateCategoriesPage() {
     description: '',
   })
 
-  // Fetch categories
-  const {
-    data: categories,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['templateCategories'],
-    queryFn: () => templatesApi.listCategories(),
-    refetchOnMount: false,
-  })
+  // Categories query state
+  const [categories, setCategories] = useState<TemplateCategory[] | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Create category mutation
-  const createMutation = useMutation({
-    mutationFn: (data: CategoryFormData) => templatesApi.createCategory(data),
-    onSuccess: () => {
-      toast.success(t('templates:categoryCreated'))
-      queryClient.invalidateQueries({ queryKey: ['templateCategories'] })
-      setShowCreateDialog(false)
-      resetForm()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
+  const fetchCategories = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const result = await templatesApi.listCategories()
+      setCategories(result)
+    } catch (err) {
+      // ignore
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
-  // Update category mutation
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<CategoryFormData> }) =>
-      templatesApi.updateCategory(id, data),
-    onSuccess: () => {
-      toast.success(t('templates:categoryUpdated'))
-      queryClient.invalidateQueries({ queryKey: ['templateCategories'] })
-      setEditingCategory(null)
-      resetForm()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
 
-  // Delete category mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => templatesApi.deleteCategory(id),
-    onSuccess: () => {
-      toast.success(t('templates:categoryDeleted'))
-      queryClient.invalidateQueries({ queryKey: ['templateCategories'] })
-      setDeletingCategory(null)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
+  // Mutation loading states
+  const [isCreating, setIsCreating] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const resetForm = () => {
     setFormData({
@@ -129,29 +98,59 @@ export function TemplateCategoriesPage() {
     })
   }
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!formData.name.trim()) {
       toast.error(t('common:required'))
       return
     }
-    createMutation.mutate({
-      name: formData.name,
-      description: formData.description || undefined,
-    })
+    setIsCreating(true)
+    try {
+      await templatesApi.createCategory({
+        name: formData.name,
+        description: formData.description || undefined,
+      })
+      toast.success(t('templates:categoryCreated'))
+      await fetchCategories()
+      setShowCreateDialog(false)
+      resetForm()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('common:error'))
+    } finally {
+      setIsCreating(false)
+    }
   }
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingCategory || !formData.name.trim()) {
       toast.error(t('common:required'))
       return
     }
-    updateMutation.mutate({
-      id: editingCategory.id,
-      data: {
+    setIsUpdating(true)
+    try {
+      await templatesApi.updateCategory(editingCategory.id, {
         name: formData.name,
         description: formData.description || undefined,
-      },
-    })
+      })
+      toast.success(t('templates:categoryUpdated'))
+      await fetchCategories()
+      setEditingCategory(null)
+      resetForm()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('common:error'))
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    try {
+      await templatesApi.deleteCategory(id)
+      toast.success(t('templates:categoryDeleted'))
+      await fetchCategories()
+      setDeletingCategory(null)
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('common:error'))
+    }
   }
 
   // Filter categories by search
@@ -186,7 +185,7 @@ export function TemplateCategoriesPage() {
           <p className="text-muted-foreground">{t('templates:categoriesDescription')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => refetch()}>
+          <Button variant="outline" size="icon" onClick={() => fetchCategories()}>
             <RefreshCw className="h-4 w-4" />
           </Button>
           <Button onClick={() => setShowCreateDialog(true)}>
@@ -331,7 +330,7 @@ export function TemplateCategoriesPage() {
             </Button>
             <Button
               onClick={editingCategory ? handleUpdate : handleCreate}
-              disabled={createMutation.isPending || updateMutation.isPending}
+              disabled={isCreating || isUpdating}
             >
               {editingCategory ? t('common:save') : t('common:create')}
             </Button>
@@ -357,7 +356,7 @@ export function TemplateCategoriesPage() {
             <AlertDialogCancel>{t('common:cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() =>
-                deletingCategory && deleteMutation.mutate(deletingCategory.id)
+                deletingCategory && handleDelete(deletingCategory.id)
               }
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >

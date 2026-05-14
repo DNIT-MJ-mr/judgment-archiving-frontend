@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import {
   ArrowLeft,
   FileText,
@@ -60,29 +59,57 @@ export function JudgmentDetailPage() {
   const [showPreview, setShowPreview] = useState(false)
   const { language } = useLanguage()
 
-  // Fetch judgment
-  const {
-    data: judgment,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['judgment', id],
-    queryFn: () => judgmentsApi.get(id),
-    enabled: !!id,
-  })
+  const [judgment, setJudgment] = useState<Awaited<ReturnType<typeof judgmentsApi.get>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  // Fetch courts for name lookup
-  const { data: courts } = useQuery({
-    queryKey: ['courts'],
-    queryFn: () => courtsApi.list(),
-  })
+  const [courts, setCourts] = useState<Awaited<ReturnType<typeof courtsApi.list>> | undefined>(undefined)
 
-  // Fetch users for name lookup
-  const { data: users } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => usersApi.list(),
-    staleTime: 5 * 60 * 1000,
-  })
+  const [users, setUsers] = useState<Awaited<ReturnType<typeof usersApi.list>> | undefined>(undefined)
+
+  const fetchJudgment = useCallback(async () => {
+    if (!id) return
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await judgmentsApi.get(id)
+      setJudgment(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [id])
+
+  useEffect(() => {
+    fetchJudgment()
+  }, [fetchJudgment])
+
+  const fetchCourts = useCallback(async () => {
+    try {
+      const result = await courtsApi.list()
+      setCourts(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchCourts()
+  }, [fetchCourts])
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const result = await usersApi.list()
+      setUsers(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
 
   // Handle file download
   const handleDownload = async () => {

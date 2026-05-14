@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   FileText,
   File,
@@ -39,45 +38,70 @@ interface BatchFileListProps {
 
 export function BatchFileList({ batchId, isProcessing }: BatchFileListProps) {
   const { t } = useTranslation(['batches', 'common', 'errors'])
-  const queryClient = useQueryClient()
 
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [page, setPage] = useState(1)
   const pageSize = 20
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['batch-files', batchId, statusFilter, page],
-    queryFn: () =>
-      batchesApi.getFiles(batchId, {
+  const [data, setData] = useState<any | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  const [isRetryingFile, setIsRetryingFile] = useState(false)
+  const [isDeletingFile, setIsDeletingFile] = useState(false)
+
+  const fetchFiles = useCallback(async () => {
+    setError(null)
+    try {
+      const result = await batchesApi.getFiles(batchId, {
         status: statusFilter === 'all' ? undefined : statusFilter,
         page,
         page_size: pageSize,
-      }),
-    refetchInterval: isProcessing ? 3000 : false, // Poll while processing
-  })
+      })
+      setData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [batchId, statusFilter, page])
 
-  const retryFileMutation = useMutation({
-    mutationFn: (fileId: number) => batchesApi.retryFile(batchId, fileId),
-    onSuccess: () => {
-      toast.success(t('common:success'))
-      queryClient.invalidateQueries({ queryKey: ['batch-files', batchId] })
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
+  useEffect(() => {
+    setIsLoading(true)
+    fetchFiles()
+  }, [fetchFiles])
 
-  const deleteFileMutation = useMutation({
-    mutationFn: (fileId: number) => batchesApi.deleteFile(batchId, fileId),
-    onSuccess: () => {
+  useEffect(() => {
+    if (!isProcessing) return
+    const id = setInterval(fetchFiles, 3000)
+    return () => clearInterval(id)
+  }, [isProcessing, fetchFiles])
+
+  const handleRetryFile = async (fileId: number) => {
+    setIsRetryingFile(true)
+    try {
+      await batchesApi.retryFile(batchId, fileId)
       toast.success(t('common:success'))
-      queryClient.invalidateQueries({ queryKey: ['batch-files', batchId] })
-      queryClient.invalidateQueries({ queryKey: ['batch', batchId] })
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
+      await fetchFiles()
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsRetryingFile(false)
+    }
+  }
+
+  const handleDeleteFile = async (fileId: number) => {
+    setIsDeletingFile(true)
+    try {
+      await batchesApi.deleteFile(batchId, fileId)
+      toast.success(t('common:success'))
+      await fetchFiles()
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsDeletingFile(false)
+    }
+  }
 
   const getFileIcon = (filename: string) => {
     const ext = filename.toLowerCase().split('.').pop()
@@ -99,7 +123,7 @@ export function BatchFileList({ batchId, isProcessing }: BatchFileListProps) {
     return (
       <div className="flex h-32 flex-col items-center justify-center gap-2">
         <p className="text-destructive">{t('common:error')}</p>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>
+        <Button variant="outline" size="sm" onClick={() => fetchFiles()}>
           <RefreshCw className="me-2 h-4 w-4" />
           {t('common:refresh')}
         </Button>
@@ -201,8 +225,8 @@ export function BatchFileList({ batchId, isProcessing }: BatchFileListProps) {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => retryFileMutation.mutate(file.id)}
-                          disabled={retryFileMutation.isPending || isProcessing}
+                          onClick={() => handleRetryFile(file.id)}
+                          disabled={isRetryingFile || isProcessing}
                         >
                           <RotateCcw className="h-4 w-4" />
                         </Button>
@@ -223,10 +247,10 @@ export function BatchFileList({ batchId, isProcessing }: BatchFileListProps) {
                           className="h-8 w-8 text-destructive hover:text-destructive"
                           onClick={() => {
                             if (confirm(t('confirmDelete'))) {
-                              deleteFileMutation.mutate(file.id)
+                              handleDeleteFile(file.id)
                             }
                           }}
-                          disabled={deleteFileMutation.isPending}
+                          disabled={isDeletingFile}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

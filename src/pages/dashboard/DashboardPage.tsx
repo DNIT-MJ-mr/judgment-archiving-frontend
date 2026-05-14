@@ -1,6 +1,6 @@
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import {
   FileText,
   CheckCircle,
@@ -68,12 +68,28 @@ export function DashboardPage() {
   const permissions = usePermissions()
   const { language } = useLanguage()
 
-  const { data: stats, isLoading, error } = useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: dashboardApi.getStats,
-    refetchInterval: 30000, // Refresh every 30 seconds
-    refetchOnMount: false,
-  })
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof dashboardApi.getStats>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  const fetchStats = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await dashboardApi.getStats()
+      setStats(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchStats()
+    const interval = setInterval(fetchStats, 30000)
+    return () => clearInterval(interval)
+  }, [fetchStats])
 
   if (isLoading) {
     return (

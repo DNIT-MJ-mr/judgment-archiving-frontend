@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import {
   FileText,
   AlertCircle,
@@ -37,30 +36,47 @@ export function DataEntryQueuePage() {
   const [page, setPage] = useState(1)
   const pageSize = 20
 
-  // Fetch queue
-  const {
-    data: queueData,
-    isLoading,
-    error,
-    refetch,
-    isFetching,
-  } = useQuery({
-    queryKey: ['data-entry-queue', statusFilter, page],
-    queryFn: () =>
-      dataEntryApi.getQueue({
+  const [queueData, setQueueData] = useState<Awaited<ReturnType<typeof dataEntryApi.getQueue>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [isFetching, setIsFetching] = useState(false)
+
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof dataEntryApi.getStats>> | undefined>(undefined)
+
+  const fetchQueue = useCallback(async () => {
+    setIsFetching(true)
+    setError(null)
+    try {
+      const result = await dataEntryApi.getQueue({
         status: statusFilter,
         page,
         page_size: pageSize,
-      }),
-    refetchOnMount: false,
-  })
+      })
+      setQueueData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+      setIsFetching(false)
+    }
+  }, [statusFilter, page])
 
-  // Fetch stats
-  const { data: stats } = useQuery({
-    queryKey: ['data-entry-stats'],
-    queryFn: () => dataEntryApi.getStats(),
-    refetchOnMount: false,
-  })
+  useEffect(() => {
+    fetchQueue()
+  }, [fetchQueue])
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const result = await dataEntryApi.getStats()
+      setStats(result)
+    } catch (err) {
+      setStats(undefined)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchStats()
+  }, [fetchStats])
 
   // Get next item
   const handleGetNext = async () => {
@@ -86,7 +102,7 @@ export function DataEntryQueuePage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-4">
         <p className="text-destructive">{t('common:error')}</p>
-        <Button onClick={() => refetch()} variant="outline">
+        <Button onClick={() => fetchQueue()} variant="outline">
           <RefreshCw className="me-2 h-4 w-4" />
           {t('common:refresh')}
         </Button>
@@ -112,7 +128,7 @@ export function DataEntryQueuePage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => refetch()}
+            onClick={() => fetchQueue()}
             disabled={isFetching}
           >
             <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />

@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import {
   Plus,
   FolderOpen,
@@ -33,15 +32,30 @@ export function BatchesListPage() {
   const [page, setPage] = useState(1)
   const pageSize = 20
 
-  const { data: batches, isLoading, error, refetch } = useQuery({
-    queryKey: ['batches', statusFilter, page],
-    queryFn: () =>
-      batchesApi.list({
+  const [batches, setBatches] = useState<any[] | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  const fetchBatches = useCallback(async () => {
+    setError(null)
+    try {
+      const result = await batchesApi.list({
         status: statusFilter === 'all' ? undefined : statusFilter,
         page,
         page_size: pageSize,
-      }),
-  })
+      })
+      setBatches(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [statusFilter, page])
+
+  useEffect(() => {
+    setIsLoading(true)
+    fetchBatches()
+  }, [fetchBatches])
 
   const handleCreateBatch = () => {
     navigate('/batches/new')
@@ -59,7 +73,7 @@ export function BatchesListPage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-4">
         <p className="text-destructive">{t('common:error')}</p>
-        <Button onClick={() => refetch()} variant="outline">
+        <Button onClick={() => fetchBatches()} variant="outline">
           <RefreshCw className="me-2 h-4 w-4" />
           {t('common:refresh')}
         </Button>
@@ -115,7 +129,7 @@ export function BatchesListPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <Button variant="outline" size="sm" onClick={() => fetchBatches()}>
               <RefreshCw className="me-2 h-4 w-4" />
               {t('common:refresh')}
             </Button>

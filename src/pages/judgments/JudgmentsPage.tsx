@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import {
   Search,
   Filter,
@@ -59,11 +58,24 @@ export function JudgmentsPage() {
   const [page, setPage] = useState(1)
   const pageSize = 20
 
-  // Fetch courts for dropdown
-  const { data: courts } = useQuery({
-    queryKey: ['courts'],
-    queryFn: () => courtsApi.list(),
-  })
+  const [courts, setCourts] = useState<Awaited<ReturnType<typeof courtsApi.list>> | undefined>(undefined)
+
+  const [response, setResponse] = useState<Awaited<ReturnType<typeof judgmentsApi.search>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  const fetchCourts = useCallback(async () => {
+    try {
+      const result = await courtsApi.list()
+      setCourts(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchCourts()
+  }, [fetchCourts])
 
   // Build query params
   const queryParams = {
@@ -79,16 +91,22 @@ export function JudgmentsPage() {
     ...(appliedFilters.date_to && { date_to: appliedFilters.date_to }),
   }
 
-  // Fetch judgments
-  const {
-    data: response,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['judgments', queryParams],
-    queryFn: () => judgmentsApi.search(queryParams),
-    refetchOnMount: false,
-  })
+  const fetchJudgments = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await judgmentsApi.search(queryParams)
+      setResponse(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [page, appliedFilters.case_number, appliedFilters.judgment_number, appliedFilters.court_id, appliedFilters.court, appliedFilters.judgment_type, appliedFilters.extraction_status, appliedFilters.date_from, appliedFilters.date_to])
+
+  useEffect(() => {
+    fetchJudgments()
+  }, [fetchJudgments])
 
   const handleFilterChange = (key: keyof SearchFilters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }))

@@ -1,9 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useQuery } from '@tanstack/react-query'
 import { AlertCircle, Info, Sparkles } from 'lucide-react'
 import { courtsApi } from '@/api'
 import { cn } from '@/lib/utils'
@@ -97,11 +96,20 @@ export function JudgmentForm({
 }: JudgmentFormProps) {
   const { t } = useTranslation(['judgments', 'dataEntry', 'common', 'errors'])
 
-  // Fetch courts for dropdown
-  const { data: courts } = useQuery({
-    queryKey: ['courts'],
-    queryFn: () => courtsApi.list(),
-  })
+  const [courts, setCourts] = useState<Awaited<ReturnType<typeof courtsApi.list>> | undefined>(undefined)
+
+  const fetchCourts = useCallback(async () => {
+    try {
+      const result = await courtsApi.list()
+      setCourts(result)
+    } catch (err) {
+      // courts remain undefined
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchCourts()
+  }, [fetchCourts])
 
   const {
     register,

@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   Building2,
@@ -56,7 +55,6 @@ interface CourtFormData {
 
 export function CourtsPage() {
   const { t } = useTranslation(['admin', 'common'])
-  const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editingCourt, setEditingCourt] = useState<Court | null>(null)
@@ -70,66 +68,29 @@ export function CourtsPage() {
     aliases: [],
   })
 
-  // Fetch courts with stats
-  const {
-    data: courts,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['courts-with-stats'],
-    queryFn: () => courtsApi.listWithStats(),
-    refetchOnMount: false,
-  })
+  // Courts query state
+  const [courts, setCourts] = useState<Awaited<ReturnType<typeof courtsApi.listWithStats>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Create court mutation
-  const createMutation = useMutation({
-    mutationFn: (data: CourtFormData) => courtsApi.create(data),
-    onSuccess: () => {
-      toast.success(t('courtCreated'))
-      queryClient.invalidateQueries({ queryKey: ['courts-with-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['courts'] })
-      setShowCreateDialog(false)
-      resetForm()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
+  const fetchCourts = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const result = await courtsApi.listWithStats()
+      setCourts(result)
+    } catch (err) {
+      // ignore
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
-  // Update court mutation
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<CourtFormData> }) =>
-      courtsApi.update(id, data),
-    onSuccess: () => {
-      toast.success(t('courtUpdated'))
-      queryClient.invalidateQueries({ queryKey: ['courts-with-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['courts'] })
-      setEditingCourt(null)
-      resetForm()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
+  useEffect(() => {
+    fetchCourts()
+  }, [fetchCourts])
 
-  // Delete court mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => courtsApi.delete(id),
-    onSuccess: () => {
-      toast.success(t('courtDeleted'))
-      queryClient.invalidateQueries({ queryKey: ['courts-with-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['courts'] })
-      setDeletingCourt(null)
-    },
-    onError: (error: any) => {
-      const detail = error.response?.data?.detail
-      if (typeof detail === 'object') {
-        toast.error(`${detail.message} (${detail.judgments} judgments, ${detail.users} users)`)
-      } else {
-        toast.error(detail || t('common:error'))
-      }
-    },
-  })
+  // Mutation loading states
+  const [isCreating, setIsCreating] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
 
   const resetForm = () => {
     setFormData({
@@ -166,13 +127,51 @@ export function CourtsPage() {
     }))
   }
 
-  const handleCreate = () => {
-    createMutation.mutate(formData)
+  const handleCreate = async () => {
+    setIsCreating(true)
+    try {
+      await courtsApi.create(formData)
+      toast.success(t('courtCreated'))
+      await fetchCourts()
+      setShowCreateDialog(false)
+      resetForm()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('common:error'))
+    } finally {
+      setIsCreating(false)
+    }
   }
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingCourt) return
-    updateMutation.mutate({ id: editingCourt.id, data: formData })
+    setIsUpdating(true)
+    try {
+      await courtsApi.update(editingCourt.id, formData)
+      toast.success(t('courtUpdated'))
+      await fetchCourts()
+      setEditingCourt(null)
+      resetForm()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('common:error'))
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    try {
+      await courtsApi.delete(id)
+      toast.success(t('courtDeleted'))
+      await fetchCourts()
+      setDeletingCourt(null)
+    } catch (error: any) {
+      const detail = error.response?.data?.detail
+      if (typeof detail === 'object') {
+        toast.error(`${detail.message} (${detail.judgments} judgments, ${detail.users} users)`)
+      } else {
+        toast.error(detail || t('common:error'))
+      }
+    }
   }
 
   // Filter courts by search
@@ -199,7 +198,7 @@ export function CourtsPage() {
           <p className="text-muted-foreground">{t('courtManagementDescription')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => refetch()}>
+          <Button variant="outline" size="icon" onClick={() => fetchCourts()}>
             <RefreshCw className="h-4 w-4" />
           </Button>
           <Button onClick={() => setShowCreateDialog(true)}>
@@ -453,7 +452,7 @@ export function CourtsPage() {
             </Button>
             <Button
               onClick={editingCourt ? handleUpdate : handleCreate}
-              disabled={createMutation.isPending || updateMutation.isPending}
+              disabled={isCreating || isUpdating}
             >
               {editingCourt ? t('common:save') : t('common:create')}
             </Button>
@@ -473,7 +472,7 @@ export function CourtsPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common:cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deletingCourt && deleteMutation.mutate(deletingCourt.id)}
+              onClick={() => deletingCourt && handleDelete(deletingCourt.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {t('common:delete')}

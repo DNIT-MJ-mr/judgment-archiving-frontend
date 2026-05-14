@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Clock, User } from 'lucide-react'
 import { auditLogsApi } from '@/api'
@@ -22,15 +22,28 @@ interface JudgmentAuditLogsProps {
 export function JudgmentAuditLogs({ judgmentId }: JudgmentAuditLogsProps) {
     const { t } = useTranslation(['common', 'admin'])
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['audit-logs', 'judgment', judgmentId],
-        queryFn: () =>
-            auditLogsApi.list({
+    const [data, setData] = useState<Awaited<ReturnType<typeof auditLogsApi.list>> | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
+
+    const fetchLogs = useCallback(async () => {
+        setIsLoading(true)
+        try {
+            const result = await auditLogsApi.list({
                 entity_type: 'judgment',
                 entity_id: judgmentId,
-                page_size: 50, // Fetch recent logs
-            }),
-    })
+                page_size: 50,
+            })
+            setData(result)
+        } catch (err) {
+            setData(null)
+        } finally {
+            setIsLoading(false)
+        }
+    }, [judgmentId])
+
+    useEffect(() => {
+        fetchLogs()
+    }, [fetchLogs])
 
     if (isLoading) {
         return (

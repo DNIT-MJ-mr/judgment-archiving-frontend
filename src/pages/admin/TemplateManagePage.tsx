@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Edit, Trash2, RefreshCw, Search, Eye, Upload as UploadIcon } from 'lucide-react'
 import { templatesApi } from '@/api'
 import { Button } from '@/components/ui/button'
@@ -53,7 +52,6 @@ interface TemplateFormData {
 export function TemplateManagePage() {
   const { t } = useTranslation(['templates', 'common'])
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
 
   // State
   const [search, setSearch] = useState('')
@@ -69,71 +67,50 @@ export function TemplateManagePage() {
     category_id: undefined,
   })
 
-  // Fetch templates with pagination and filters
-  const {
-    data: templatesData,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['templates', page, search, categoryFilter],
-    queryFn: () => {
+  // Templates query state
+  const [templatesData, setTemplatesData] = useState<Awaited<ReturnType<typeof templatesApi.list>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  const fetchTemplates = useCallback(async () => {
+    setIsLoading(true)
+    try {
       let categoryId: number | undefined = undefined
       if (categoryFilter !== 'all' && categoryFilter !== 'no-category') {
         categoryId = Number(categoryFilter)
       }
-      return templatesApi.list(page, 20, search, categoryId)
-    },
-  })
+      const result = await templatesApi.list(page, 20, search, categoryId)
+      setTemplatesData(result)
+    } catch (err) {
+      // ignore
+    } finally {
+      setIsLoading(false)
+    }
+  }, [page, search, categoryFilter])
 
-  // Fetch categories for dropdown
-  const { data: categories = [] } = useQuery({
-    queryKey: ['templateCategories'],
-    queryFn: () => templatesApi.listCategories(),
-  })
+  useEffect(() => {
+    fetchTemplates()
+  }, [fetchTemplates])
 
-  // Upload mutation
-  const uploadMutation = useMutation({
-    mutationFn: (files: File[]) =>
-      templatesApi.bulkUpload(files, uploadCategoryId),
-    onSuccess: () => {
-      toast.success(t('templates:templatesUploaded'))
-      queryClient.invalidateQueries({ queryKey: ['templates'] })
-      setShowUploadDialog(false)
-      setUploadFiles([])
-      setUploadCategoryId(undefined)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('templates:errorUploadingTemplates'))
-    },
-  })
+  // Categories query state
+  const [categories, setCategories] = useState<Awaited<ReturnType<typeof templatesApi.listCategories>>>([])
 
-  // Update mutation
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<TemplateFormData> }) =>
-      templatesApi.update(id, data),
-    onSuccess: () => {
-      toast.success(t('templates:templateUpdated'))
-      queryClient.invalidateQueries({ queryKey: ['templates'] })
-      setEditingTemplate(null)
-      resetForm()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('templates:errorUpdatingTemplate'))
-    },
-  })
+  const fetchCategories = useCallback(async () => {
+    try {
+      const result = await templatesApi.listCategories()
+      setCategories(result)
+    } catch (err) {
+      // ignore
+    }
+  }, [])
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => templatesApi.delete(id),
-    onSuccess: () => {
-      toast.success(t('templates:templateDeleted'))
-      queryClient.invalidateQueries({ queryKey: ['templates'] })
-      setDeletingTemplate(null)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('templates:errorDeletingTemplate'))
-    },
-  })
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
+
+  // Mutation loading states
+  const [isUploading, setIsUploading] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const resetForm = () => {
     setFormData({
@@ -150,26 +127,60 @@ export function TemplateManagePage() {
     })
   }
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingTemplate || !formData.title.trim()) {
       toast.error(t('common:required'))
       return
     }
-    updateMutation.mutate({
-      id: editingTemplate.id,
-      data: {
+    setIsUpdating(true)
+    try {
+      await templatesApi.update(editingTemplate.id, {
         title: formData.title,
         category_id: formData.category_id,
-      },
-    })
+      })
+      toast.success(t('templates:templateUpdated'))
+      await fetchTemplates()
+      setEditingTemplate(null)
+      resetForm()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('templates:errorUpdatingTemplate'))
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (uploadFiles.length === 0) {
       toast.error(t('common:required'))
       return
     }
-    uploadMutation.mutate(uploadFiles)
+    setIsUploading(true)
+    try {
+      await templatesApi.bulkUpload(uploadFiles, uploadCategoryId)
+      toast.success(t('templates:templatesUploaded'))
+      await fetchTemplates()
+      setShowUploadDialog(false)
+      setUploadFiles([])
+      setUploadCategoryId(undefined)
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('templates:errorUploadingTemplates'))
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    setIsDeleting(true)
+    try {
+      await templatesApi.delete(id)
+      toast.success(t('templates:templateDeleted'))
+      await fetchTemplates()
+      setDeletingTemplate(null)
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('templates:errorDeletingTemplate'))
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   if (isLoading) {
@@ -186,10 +197,10 @@ export function TemplateManagePage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">{t('templates:manageTemplates')}</h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => refetch()}>
+          <Button variant="outline" size="icon" onClick={() => fetchTemplates()}>
             <RefreshCw className="h-4 w-4" />
           </Button>
-          
+
           <Button onClick={() => setShowUploadDialog(true)}>
             <Plus className="me-2 h-4 w-4" />
             {t('templates:manageCategories')}
@@ -375,7 +386,7 @@ export function TemplateManagePage() {
             >
               {t('common:cancel')}
             </Button>
-            <Button onClick={handleUpload} disabled={uploadMutation.isPending || uploadFiles.length === 0}>
+            <Button onClick={handleUpload} disabled={isUploading || uploadFiles.length === 0}>
               {t('common:upload')}
             </Button>
           </DialogFooter>
@@ -447,7 +458,7 @@ export function TemplateManagePage() {
             >
               {t('common:cancel')}
             </Button>
-            <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
+            <Button onClick={handleUpdate} disabled={isUpdating}>
               {t('common:save')}
             </Button>
           </DialogFooter>
@@ -471,7 +482,7 @@ export function TemplateManagePage() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common:cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deletingTemplate && deleteMutation.mutate(deletingTemplate.id)}
+              onClick={() => deletingTemplate && handleDelete(deletingTemplate.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {t('common:delete')}

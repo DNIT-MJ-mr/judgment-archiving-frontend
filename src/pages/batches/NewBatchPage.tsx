@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
 import { Loader2, ArrowLeft, Upload, FolderPlus, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { batchesApi } from '@/api'
@@ -33,43 +32,40 @@ export function NewBatchPage() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const { language } = useLanguage()
 
-  // Mutations
-  const createBatchMutation = useMutation({
-    mutationFn: (name: string) => batchesApi.create(name),
-    onSuccess: (batch) => {
-      setBatchId(batch.id)
-      setStep('upload')
-      toast.success(t('batchCreated'))
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
-
-  const uploadFilesMutation = useMutation({
-    mutationFn: ({ batchId, files }: { batchId: number; files: File[] }) =>
-      batchesApi.uploadFiles(batchId, files, setUploadProgress),
-    onSuccess: () => {
-      toast.success(t('filesUploaded'))
-      setStep('complete')
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:fileUploadFailed'))
-    },
-  })
+  const [isCreating, setIsCreating] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   // Handlers
-  const handleCreateBatch = () => {
+  const handleCreateBatch = async () => {
     if (!batchName.trim()) {
       toast.error(t('errors:requiredFieldMissing'))
       return
     }
-    createBatchMutation.mutate(batchName.trim())
+    setIsCreating(true)
+    try {
+      const batch = await batchesApi.create(batchName.trim())
+      setBatchId(batch.id)
+      setStep('upload')
+      toast.success(t('batchCreated'))
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsCreating(false)
+    }
   }
 
-  const handleUploadFiles = () => {
+  const handleUploadFiles = async () => {
     if (!batchId || selectedFiles.length === 0) return
-    uploadFilesMutation.mutate({ batchId, files: selectedFiles })
+    setIsUploading(true)
+    try {
+      await batchesApi.uploadFiles(batchId, selectedFiles, setUploadProgress)
+      toast.success(t('filesUploaded'))
+      setStep('complete')
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('errors:fileUploadFailed'))
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleRemoveFile = (index: number) => {
@@ -92,9 +88,6 @@ export function NewBatchPage() {
       toast.error(error.response?.data?.detail || t('errors:generic'))
     }
   }
-
-  const isCreating = createBatchMutation.isPending
-  const isUploading = uploadFilesMutation.isPending
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">

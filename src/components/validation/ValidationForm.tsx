@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
 import { Sparkles } from 'lucide-react'
 import { courtsApi } from '@/api'
 import { cn, formatDate } from '@/lib/utils'
@@ -121,11 +120,20 @@ export function ValidationForm({
     sentence_summary: fields.sentence_summary || '',
   })
 
-  // Fetch courts for dropdown
-  const { data: courts } = useQuery({
-    queryKey: ['courts'],
-    queryFn: () => courtsApi.list(),
-  })
+  const [courts, setCourts] = useState<Awaited<ReturnType<typeof courtsApi.list>> | undefined>(undefined)
+
+  const fetchCourts = useCallback(async () => {
+    try {
+      const result = await courtsApi.list()
+      setCourts(result)
+    } catch (err) {
+      // courts remain undefined
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchCourts()
+  }, [fetchCourts])
 
   // Update form when fields change
   useEffect(() => {

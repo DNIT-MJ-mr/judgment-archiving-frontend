@@ -1,6 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ArrowRight, Download, Printer, RotateCcw, Loader2 } from 'lucide-react'
 import * as pdfjsLib from 'pdfjs-dist'
@@ -56,16 +55,32 @@ export function TemplateFillPage() {
   const [generating, setGenerating] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
 
+  const [template, setTemplate] = useState<Awaited<ReturnType<typeof templatesApi.get>> | null>(null)
+  const [templateLoading, setTemplateLoading] = useState(true)
+  const [templateError, setTemplateError] = useState<Error | null>(null)
+
   const canvasRefs = useRef<Map<number, HTMLCanvasElement | null>>(new Map())
   const containerRefs = useRef<Map<number, HTMLDivElement | null>>(new Map())
 
   // ── Data fetching ───────────────────────────────────────────────────────────
 
-  const { data: template, isLoading: templateLoading } = useQuery({
-    queryKey: ['template', templateId],
-    queryFn: () => (templateId ? templatesApi.get(+templateId) : null),
-    enabled: !!templateId,
-  })
+  const fetchTemplate = useCallback(async () => {
+    if (!templateId) return
+    setTemplateLoading(true)
+    setTemplateError(null)
+    try {
+      const result = await templatesApi.get(+templateId)
+      setTemplate(result)
+    } catch (err) {
+      setTemplateError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setTemplateLoading(false)
+    }
+  }, [templateId])
+
+  useEffect(() => {
+    fetchTemplate()
+  }, [fetchTemplate])
 
   // Effect 1: load PDF metadata — no canvas rendering yet
   useEffect(() => {

@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
@@ -20,16 +19,6 @@ import { TemplateFillPage } from '@/pages/templates/TemplateFillPage'
 // Placeholder for 404
 const NotFoundPage = () => <div className="p-4">404 - Page Not Found</div>
 
-// Create a query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-})
 
 function AppRoutes() {
   return (
@@ -200,23 +189,21 @@ function AppRoutes() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <LanguageProvider>
-          <AuthProvider>
-            <SidebarProvider>
-              <AppRoutes />
-              <Toaster 
-                position="top-center"
-                toastOptions={{
-                  className: 'rtl:font-arabic ltr:font-latin',
-                }}
-              />
-            </SidebarProvider>
-          </AuthProvider>
-        </LanguageProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <LanguageProvider>
+        <AuthProvider>
+          <SidebarProvider>
+            <AppRoutes />
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                className: 'rtl:font-arabic ltr:font-latin',
+              }}
+            />
+          </SidebarProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </BrowserRouter>
   )
 }
 

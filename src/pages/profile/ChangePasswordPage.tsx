@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   ArrowLeft,
@@ -39,6 +38,8 @@ export function ChangePasswordPage() {
   const [showConfirm, setShowConfirm] = useState(false)
   const { language } = useLanguage()
 
+  const [isSaving, setIsSaving] = useState(false)
+
   const {
     register,
     handleSubmit,
@@ -49,14 +50,14 @@ export function ChangePasswordPage() {
     mode: 'onChange',
   })
 
-  const changeMutation = useMutation({
-    mutationFn: (data: PasswordFormValues) => authApi.changePassword(data),
-    onSuccess: () => {
+  const onSubmit = async (data: PasswordFormValues) => {
+    setIsSaving(true)
+    try {
+      await authApi.changePassword(data)
       toast.success(t('passwordChanged'))
       reset()
       navigate('/profile')
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       const detail = error.response?.data?.detail
       if (detail === 'Current password is incorrect') {
         toast.error(t('currentPasswordIncorrect'))
@@ -65,11 +66,9 @@ export function ChangePasswordPage() {
       } else {
         toast.error(detail || t('errors:generic'))
       }
-    },
-  })
-
-  const onSubmit = (data: PasswordFormValues) => {
-    changeMutation.mutate(data)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
@@ -202,9 +201,9 @@ export function ChangePasswordPage() {
               </Button>
               <Button
                 type="submit"
-                disabled={!isValid || changeMutation.isPending}
+                disabled={!isValid || isSaving}
               >
-                {changeMutation.isPending ? (
+                {isSaving ? (
                   t('common:loading')
                 ) : (
                   <>

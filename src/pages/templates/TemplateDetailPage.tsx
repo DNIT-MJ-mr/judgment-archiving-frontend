@@ -1,8 +1,7 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Download, Printer, Edit2, ArrowRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { templatesApi, apiClient } from '@/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,20 +19,42 @@ export function TemplateDetailPage() {
   const [pdfLoading, setPdfLoading] = useState(false)
   const { language } = useLanguage()
 
-  const {
-    data: template,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['template', templateId],
-    queryFn: () => (templateId ? templatesApi.get(parseInt(templateId, 10)) : null),
-    enabled: !!templateId,
-  })
+  const [template, setTemplate] = useState<Awaited<ReturnType<typeof templatesApi.get>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ['templateCategories'],
-    queryFn: () => templatesApi.listCategories(),
-  })
+  const [categories, setCategories] = useState<Awaited<ReturnType<typeof templatesApi.listCategories>>>([])
+
+  const fetchTemplate = useCallback(async () => {
+    if (!templateId) return
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await templatesApi.get(parseInt(templateId, 10))
+      setTemplate(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [templateId])
+
+  useEffect(() => {
+    fetchTemplate()
+  }, [fetchTemplate])
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const result = await templatesApi.listCategories()
+      setCategories(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
 
   // Fetch PDF blob when template is loaded
   useEffect(() => {

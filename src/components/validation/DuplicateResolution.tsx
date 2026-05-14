@@ -1,5 +1,5 @@
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import {
   ExternalLink,
@@ -31,12 +31,25 @@ export function DuplicateResolution({
 }: DuplicateResolutionProps) {
   const { t } = useTranslation(['validation', 'judgments', 'common'])
 
-  // Fetch the potential duplicate judgment
-  const { data: duplicateJudgment, isLoading } = useQuery({
-    queryKey: ['judgment', duplicateOfId],
-    queryFn: () => judgmentsApi.get(duplicateOfId),
-    enabled: !!duplicateOfId,
-  })
+  const [duplicateJudgment, setDuplicateJudgment] = useState<Awaited<ReturnType<typeof judgmentsApi.get>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  const fetchDuplicateJudgment = useCallback(async () => {
+    if (!duplicateOfId) return
+    setIsLoading(true)
+    try {
+      const result = await judgmentsApi.get(duplicateOfId)
+      setDuplicateJudgment(result)
+    } catch (err) {
+      setDuplicateJudgment(null)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [duplicateOfId])
+
+  useEffect(() => {
+    fetchDuplicateJudgment()
+  }, [fetchDuplicateJudgment])
 
   if (isLoading) {
     return (
@@ -109,8 +122,8 @@ export function DuplicateResolution({
             <span>
               {t('judgments:extractionStatus')}: {' '}
               <span className={
-                duplicateJudgment.extraction_status === 'verified' 
-                  ? 'text-mr-green font-medium' 
+                duplicateJudgment.extraction_status === 'verified'
+                  ? 'text-mr-green font-medium'
                   : ''
               }>
                 {t(`judgments:statuses.${duplicateJudgment.extraction_status}`)}

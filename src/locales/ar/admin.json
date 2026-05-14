@@ -91,14 +91,15 @@
   "username": "اسم المستخدم",
   "fullName": "الاسم الكامل",
   "role": "الدور",
+  "status": "الحالة",
   "court": "المحكمة",
   "selectCourt": "اختر المحكمة",
   "noCourt": "بدون محكمة",
   "roles": {
-    "admin": "مدير",
+    "admin": "مسؤول",
     "validator": "مدقق",
-    "data_entry": "إدخال بيانات",
-    "viewer": "عارض"
+    "data_entry": "مدخل بيانات",
+    "viewer": "متصفح"
   },
   "active": "نشط",
   "inactive": "غير نشط",

@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   User,
@@ -33,6 +32,7 @@ export function ProfilePage() {
   const { t } = useTranslation(['profile', 'common', 'users'])
   const { user, refreshUser } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const {
     register,
@@ -46,25 +46,23 @@ export function ProfilePage() {
     },
   })
 
-  const updateMutation = useMutation({
-    mutationFn: (data: ProfileFormValues) => authApi.updateProfile(data),
-    onSuccess: () => {
-      toast.success(t('profileUpdated'))
-      setIsEditing(false)
-      refreshUser()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
-
   const handleCancel = () => {
     reset({ full_name: user?.full_name || '' })
     setIsEditing(false)
   }
 
-  const onSubmit = (data: ProfileFormValues) => {
-    updateMutation.mutate(data)
+  const onSubmit = async (data: ProfileFormValues) => {
+    setIsSaving(true)
+    try {
+      await authApi.updateProfile(data)
+      toast.success(t('profileUpdated'))
+      setIsEditing(false)
+      refreshUser()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('common:error'))
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const getRoleBadgeColor = (role: string) => {
@@ -131,9 +129,9 @@ export function ProfilePage() {
                   <X className="me-2 h-4 w-4" />
                   {t('common:cancel')}
                 </Button>
-                <Button type="submit" disabled={!isDirty || updateMutation.isPending}>
+                <Button type="submit" disabled={!isDirty || isSaving}>
                   <Save className="me-2 h-4 w-4" />
-                  {updateMutation.isPending ? t('common:loading') : t('common:save')}
+                  {isSaving ? t('common:loading') : t('common:save')}
                 </Button>
               </div>
             </form>

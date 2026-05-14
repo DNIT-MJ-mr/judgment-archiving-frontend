@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   ArrowLeft,
@@ -41,44 +40,60 @@ export function DataEntryEditPage() {
   const { language } = useLanguage()
   const { judgmentId } = useParams<{ judgmentId: string }>()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
   const id = parseInt(judgmentId || '0', 10)
 
   const [showPreview, setShowPreview] = useState(true)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteReason, setDeleteReason] = useState('')
 
-  // Fetch judgment details
-  const {
-    data: judgment,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['data-entry-item', id],
-    queryFn: () => dataEntryApi.getItem(id),
-    enabled: !!id,
-  })
+  // Judgment query state
+  const [judgment, setJudgment] = useState<Awaited<ReturnType<typeof dataEntryApi.getItem>> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  // Update mutation
-  const updateMutation = useMutation({
-    mutationFn: (data: JudgmentFormValues) => dataEntryApi.updateItem(id, data as any),
-    onSuccess: () => {
-      toast.success(t('savedSuccessfully'))
-      queryClient.invalidateQueries({ queryKey: ['data-entry-item', id] })
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
+  const fetchJudgment = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await dataEntryApi.getItem(id)
+      setJudgment(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [id])
 
-  // Submit for review mutation
-  const submitMutation = useMutation({
-    mutationFn: async (data: JudgmentFormValues) => {
-      // First save, then submit
+  useEffect(() => {
+    if (id) {
+      fetchJudgment()
+    }
+  }, [fetchJudgment, id])
+
+  // Mutation loading states
+  const [isSaving, setIsSaving] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isGettingNext, setIsGettingNext] = useState(false)
+
+  const handleSave = async (data: JudgmentFormValues) => {
+    setIsSaving(true)
+    try {
       await dataEntryApi.updateItem(id, data as any)
-      return dataEntryApi.submitForReview(id)
-    },
-    onSuccess: (response) => {
+      toast.success(t('savedSuccessfully'))
+      await fetchJudgment()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('errors:generic'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSubmit = async (data: JudgmentFormValues) => {
+    setIsSubmitting(true)
+    try {
+      await dataEntryApi.updateItem(id, data as any)
+      const response = await dataEntryApi.submitForReview(id)
       if (response.has_potential_duplicate) {
         toast.warning(t('duplicateWarning'), {
           description: t('duplicateSubmitted'),
@@ -87,8 +102,7 @@ export function DataEntryEditPage() {
         toast.success(t('submittedSuccessfully'))
       }
       navigate('/data-entry')
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       const detail = error.response?.data?.detail
       if (typeof detail === 'object' && detail.missing) {
         toast.error(t('missingRequiredFields'), {
@@ -97,56 +111,44 @@ export function DataEntryEditPage() {
       } else {
         toast.error(typeof detail === 'string' ? detail : t('errors:generic'))
       }
-    },
-  })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: (reason: string) => dataEntryApi.deleteItem(id, reason),
-    onSuccess: () => {
+  const handleDelete = async () => {
+    if (deleteReason.trim().length < 5) {
+      toast.error(t('deleteReasonRequired'))
+      return
+    }
+    setIsDeleting(true)
+    try {
+      await dataEntryApi.deleteItem(id, deleteReason)
       toast.success(t('deletedSuccessfully'))
       navigate('/data-entry')
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast.error(error.response?.data?.detail || t('errors:generic'))
-    },
-  })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
-  // Get next item mutation
-  const getNextMutation = useMutation({
-    mutationFn: () => dataEntryApi.getNext(),
-    onSuccess: (nextItem) => {
+  const handleNext = async () => {
+    setIsGettingNext(true)
+    try {
+      const nextItem = await dataEntryApi.getNext()
       if (nextItem?.id) {
         navigate(`/data-entry/${nextItem.id}`)
       } else {
         toast.info(t('noMoreItems'))
         navigate('/data-entry')
       }
-    },
-    onError: () => {
+    } catch {
       toast.info(t('noMoreItems'))
       navigate('/data-entry')
-    },
-  })
-
-  const handleSave = (data: JudgmentFormValues) => {
-    updateMutation.mutate(data as any)
-  }
-
-  const handleSubmit = (data: JudgmentFormValues) => {
-    submitMutation.mutate(data as any)
-  }
-
-  const handleDelete = () => {
-    if (deleteReason.trim().length < 5) {
-      toast.error(t('deleteReasonRequired'))
-      return
+    } finally {
+      setIsGettingNext(false)
     }
-    deleteMutation.mutate(deleteReason)
-  }
-
-  const handleNext = () => {
-    getNextMutation.mutate()
   }
 
   if (isLoading) {
@@ -229,9 +231,9 @@ export function DataEntryEditPage() {
           <Button
             variant="outline"
             onClick={handleNext}
-            disabled={getNextMutation.isPending}
+            disabled={isGettingNext}
           >
-            {getNextMutation.isPending ? (
+            {isGettingNext ? (
               <Loader2 className="me-2 h-4 w-4 animate-spin" />
             ) : (
               language === 'ar' ? <ArrowRight className="me-2 h-4 w-4" /> : <ArrowLeft className="me-2 h-4 w-4" />
@@ -303,8 +305,8 @@ export function DataEntryEditPage() {
                 fieldPatterns={confidence.patterns}
                 onSubmit={handleSubmit}
                 onSave={handleSave}
-                isSubmitting={submitMutation.isPending}
-                isSaving={updateMutation.isPending}
+                isSubmitting={isSubmitting}
+                isSaving={isSaving}
                 submitLabel={t('submitForReview')}
               />
             </CardContent>
@@ -340,10 +342,10 @@ export function DataEntryEditPage() {
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={deleteReason.trim().length < 5 || deleteMutation.isPending}
+              disabled={deleteReason.trim().length < 5 || isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteMutation.isPending && (
+              {isDeleting && (
                 <Loader2 className="me-2 h-4 w-4 animate-spin" />
               )}
               {t('common:delete')}

@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   Plus,
@@ -55,7 +54,6 @@ import { User, UserCreateForm, UserUpdateForm } from '@/lib/types'
 
 export function UsersPage() {
   const { t } = useTranslation(['admin', 'common', 'auth'])
-  const queryClient = useQueryClient()
   const [search, setSearch] = useState('')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
@@ -70,81 +68,48 @@ export function UsersPage() {
     court_id: undefined,
   })
 
-  // Fetch users
-  const {
-    data: users,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => usersApi.list(),
-    refetchOnMount: false,
-  })
+  // Users query state
+  const [users, setUsers] = useState<User[] | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  // Fetch courts for dropdown
-  const { data: courts } = useQuery({
-    queryKey: ['courts'],
-    queryFn: () => courtsApi.list(),
-  })
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await usersApi.list()
+      setUsers(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
-  // Create user mutation
-  const createMutation = useMutation({
-    mutationFn: (data: UserCreateForm) => usersApi.create(data),
-    onSuccess: () => {
-      toast.success(t('userCreated'))
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-      setShowCreateDialog(false)
-      resetForm()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
 
-  // Update user mutation
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UserUpdateForm }) =>
-      usersApi.update(id, data),
-    onSuccess: () => {
-      toast.success(t('userUpdated'))
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-      setEditingUser(null)
-      resetForm()
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
+  // Courts query state
+  const [courts, setCourts] = useState<Awaited<ReturnType<typeof courtsApi.list>> | null>(null)
 
-  // Delete user mutation
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => usersApi.delete(id),
-    onSuccess: () => {
-      toast.success(t('userDeleted'))
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-      setDeletingUser(null)
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || t('common:error'))
-    },
-  })
+  const fetchCourts = useCallback(async () => {
+    try {
+      const result = await courtsApi.list()
+      setCourts(result)
+    } catch (err) {
+      // ignore
+    }
+  }, [])
 
-  // Enable/disable user mutations
-  const enableMutation = useMutation({
-    mutationFn: (id: number) => usersApi.enable(id),
-    onSuccess: () => {
-      toast.success(t('userEnabled'))
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-    },
-  })
+  useEffect(() => {
+    fetchCourts()
+  }, [fetchCourts])
 
-  const disableMutation = useMutation({
-    mutationFn: (id: number) => usersApi.disable(id),
-    onSuccess: () => {
-      toast.success(t('userDisabled'))
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-    },
-  })
+  // Mutation loading states
+  const [isCreating, setIsCreating] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const resetForm = () => {
     setFormData({
@@ -167,18 +132,74 @@ export function UsersPage() {
     })
   }
 
-  const handleCreate = () => {
-    createMutation.mutate(formData)
+  const handleCreate = async () => {
+    setIsCreating(true)
+    try {
+      await usersApi.create(formData)
+      toast.success(t('userCreated'))
+      await fetchUsers()
+      setShowCreateDialog(false)
+      resetForm()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('common:error'))
+    } finally {
+      setIsCreating(false)
+    }
   }
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!editingUser) return
     const updateData: UserUpdateForm = {
       full_name: formData.full_name || undefined,
       role: formData.role,
       court_id: formData.court_id,
     }
-    updateMutation.mutate({ id: editingUser.id, data: updateData })
+    setIsUpdating(true)
+    try {
+      await usersApi.update(editingUser.id, updateData)
+      toast.success(t('userUpdated'))
+      await fetchUsers()
+      setEditingUser(null)
+      resetForm()
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('common:error'))
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    setIsDeleting(true)
+    try {
+      await usersApi.delete(id)
+      toast.success(t('userDeleted'))
+      await fetchUsers()
+      setDeletingUser(null)
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || t('common:error'))
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleEnable = async (id: number) => {
+    try {
+      await usersApi.enable(id)
+      toast.success(t('userEnabled'))
+      await fetchUsers()
+    } catch (err) {
+      // ignore
+    }
+  }
+
+  const handleDisable = async (id: number) => {
+    try {
+      await usersApi.disable(id)
+      toast.success(t('userDisabled'))
+      await fetchUsers()
+    } catch (err) {
+      // ignore
+    }
   }
 
   // Filter users by search
@@ -223,7 +244,7 @@ export function UsersPage() {
           <p className="text-muted-foreground">{t('userManagementDescription')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => refetch()}>
+          <Button variant="outline" size="icon" onClick={() => fetchUsers()}>
             <RefreshCw className="h-4 w-4" />
           </Button>
           <Button onClick={() => setShowCreateDialog(true)}>
@@ -299,7 +320,7 @@ export function UsersPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => disableMutation.mutate(user.id)}
+                          onClick={() => handleDisable(user.id)}
                         >
                           <UserX className="h-4 w-4" />
                         </Button>
@@ -307,7 +328,7 @@ export function UsersPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => enableMutation.mutate(user.id)}
+                          onClick={() => handleEnable(user.id)}
                         >
                           <UserCheck className="h-4 w-4" />
                         </Button>
@@ -463,7 +484,7 @@ export function UsersPage() {
             </Button>
             <Button
               onClick={editingUser ? handleUpdate : handleCreate}
-              disabled={createMutation.isPending || updateMutation.isPending}
+              disabled={isCreating || isUpdating}
             >
               {editingUser ? t('common:save') : t('common:create')}
             </Button>
@@ -483,7 +504,7 @@ export function UsersPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('common:cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deletingUser && deleteMutation.mutate(deletingUser.id)}
+              onClick={() => deletingUser && handleDelete(deletingUser.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {t('common:delete')}

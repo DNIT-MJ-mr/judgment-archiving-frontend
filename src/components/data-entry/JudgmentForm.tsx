@@ -270,26 +270,35 @@ export function JudgmentForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Judgment Type */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             {renderFieldLabel(JUDGMENT_FIELDS.JUDGMENT_TYPE, t('judgmentType'))}
             <Input
               id="judgment_type"
               {...register('judgment_type')}
               placeholder={t('judgmentTypePlaceholder')}
             />
-          </div>
+          </div> */}
 
           {/* Degree */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             {renderFieldLabel(JUDGMENT_FIELDS.DEGREE, t('degree'))}
             <Input
               id="degree"
               {...register('degree')}
               placeholder={t('degreePlaceholder')}
             />
-          </div>
+          </div> */}
         </div>
-
+        
+        <div className="space-y-2">
+          {renderFieldLabel(JUDGMENT_FIELDS.DEGREE, t('degree'))}
+          <Input
+            id="degree"
+            {...register('degree')}
+            placeholder={t('degreePlaceholder')}
+          />
+        </div>
+        
         {/* Sentence Summary */}
         <div className="space-y-2">
           {renderFieldLabel('sentence_summary', t('sentenceSummary'))}
